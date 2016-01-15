@@ -17,6 +17,10 @@ void setup() {
   //debug
   Serial.begin(9600);
   
+  pinMode(A7, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A1, INPUT);
   pinMode(7, OUTPUT);
   pinMode(A6, INPUT);
   display.begin();
@@ -34,7 +38,7 @@ void setup() {
     Serial.println("RTC is NOT running!");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
-  //rtc.adjust(DateTime(2015, 12, 2, 19, 8, 0));
+  //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
 }
 
 void clearDisplay() {
@@ -43,6 +47,7 @@ void clearDisplay() {
 }
 
 void loop() { 
+  String userTime = "";
   DateTime now = rtc.now();
   float h = dht.readHumidity();
   float t = dht.readTemperature();
@@ -55,12 +60,14 @@ void loop() {
   } else {
     digitalWrite(7, LOW);
   }
+  
   display.setContrast(40);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
   clearDisplay();
   
+
   display.print(now.year(), DEC);
   display.print("/");
   display.print(now.month(), DEC);
@@ -86,5 +93,10 @@ void loop() {
   display.print(" град.2)");
     
   display.display();
+  
+  //Serial.println(analogRead(A7));
+ // Serial.println(analogRead(A3));
+  //Serial.println(analogRead(A2));
+  Serial.println(analogRead(A1));
 }
 
