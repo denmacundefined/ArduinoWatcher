@@ -21,8 +21,10 @@ void setup() {
   pinMode(A3, INPUT);
   pinMode(A2, INPUT);
   pinMode(A1, INPUT);
+  pinMode(A0, INPUT);
   pinMode(7, OUTPUT);
   pinMode(A6, INPUT);
+  pinMode (10, OUTPUT);
   display.begin();
   clearDisplay();
   dht.begin();
@@ -97,6 +99,12 @@ void loop() {
   //Serial.println(analogRead(A7));
  // Serial.println(analogRead(A3));
   //Serial.println(analogRead(A2));
-  Serial.println(analogRead(A1));
+  //Serial.println(analogRead(A1));
+  Serial.println(analogRead(A0));
+  
+  analogWrite (10, 255);
+  delay (50);
+  analogWrite (10, 0);
+  
 }
 
