@@ -96,15 +96,15 @@ void loop() {
     
   display.display();
   
-  //Serial.println(analogRead(A7));
- // Serial.println(analogRead(A3));
-  //Serial.println(analogRead(A2));
-  //Serial.println(analogRead(A1));
-  Serial.println(analogRead(A0));
-  
-  analogWrite (10, 255);
-  delay (50);
-  analogWrite (10, 0);
-  
+  Serial.println(analogRead(A7));
+  Serial.println(analogRead(A3));
+  Serial.println(analogRead(A2)); //gas
+  //Serial.println(analogRead(A1)); //vibro
+  //Serial.println(analogRead(A0)); flash
+  if (analogRead(A0) < 900 or analogRead(A2) > 200) {
+    analogWrite (10, 255);
+    delay (50);
+    analogWrite (10, 0);
+  }
 }
 
