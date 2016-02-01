@@ -84,7 +84,7 @@ void loop() {
     digitalWrite(DISPLAYLEDPIN, LOW);
   }
   display.clearDisplay();
-  display.setContrast(40);
+  display.setContrast(45);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
