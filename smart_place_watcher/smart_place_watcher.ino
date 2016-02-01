@@ -1,36 +1,56 @@
+// define section
+#define DHTPIN 9
+#define DHTTYPE DHT11
+#define DISPLAYSCLKPIN 2
+#define DISPLAYDNPIN 3
+#define DISPLAYDCPIN 4
+#define DISPLAYRSTPIN 5
+#define DISPLAYSCEPIN 6
+#define DISPLAYLEDPIN 7
+#define BUTTONPIN1 A7
+#define BUTTONPIN2 A3
+#define GASPIN A2
+#define VIBROPIN A1
+#define FLAMEPIN A0
+#define LIGHTPIN A6
+#define BUZZERPIN 10
+
+// include section
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-Adafruit_PCD8544 display = Adafruit_PCD8544(2, 3, 4, 6, 5);
-#include "DHT.h"
-#define DHTPIN 9
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
+#include <DHT.h>
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
-Adafruit_BMP085 bmp;
-#include "RTClib.h"
-RTC_DS1307 rtc;
-char daysOfTheWeek[7][12] = {"Нед.", "Пон.", "Вiв.", "Сер.", "Чет.", "Пят.", "Суб."};
+#include <RTClib.h>
 
+// create object section
+RTC_DS1307 rtc;
+Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYLEDPIN);
+DHT dht(DHTPIN, DHTTYPE);
+Adafruit_BMP085 bmp;
+
+// class section
+
+
+// config section
 void setup() {
   //debug
   Serial.begin(9600);
   
-  pinMode(A7, INPUT);
-  pinMode(A3, INPUT);
-  pinMode(A2, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(A0, INPUT);
-  pinMode(7, OUTPUT);
-  pinMode(A6, INPUT);
-  pinMode (10, OUTPUT);
+  pinMode(BUTTONPIN1, INPUT);
+  pinMode(BUTTONPIN2, INPUT);
+  pinMode(GASPIN, INPUT);
+  pinMode(VIBROPIN, INPUT);
+  pinMode(FLAMEPIN, INPUT);
+  pinMode(DISPLAYLEDPIN, OUTPUT);
+  pinMode(LIGHTPIN, INPUT);
+  pinMode (BUZZERPIN, OUTPUT);
   display.begin();
-  clearDisplay();
   dht.begin();
   if (!bmp.begin()) {
-	Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-	while (1) {}
+    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    while (1);
   }
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -43,11 +63,7 @@ void setup() {
   //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
 }
 
-void clearDisplay() {
-  display.clearDisplay();
-  display.display(); 
-}
-
+// main section
 void loop() { 
   String userTime = "";
   DateTime now = rtc.now();
@@ -56,18 +72,19 @@ void loop() {
   float t2 = bmp.readTemperature();
   long pressure = bmp.readPressure();
   int altitude = bmp.readAltitude();
-  int light = analogRead(A6);
+  int light = analogRead(LIGHTPIN);
   if (light < 100) {
-    digitalWrite(7, HIGH);
+    digitalWrite(DISPLAYLEDPIN, HIGH);
   } else {
-    digitalWrite(7, LOW);
+    digitalWrite(DISPLAYLEDPIN, LOW);
   }
   
+  display.clearDisplay();
   display.setContrast(40);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
-  clearDisplay();
+
   
 
   display.print(now.year(), DEC);
@@ -76,6 +93,7 @@ void loop() {
   display.print("/");
   display.print(now.day(), DEC);
   display.print(" ");
+  char daysOfTheWeek[7][12] = {"Нед.", "Пон.", "Вiв.", "Сер.", "Чет.", "Пят.", "Суб."};
   display.print(daysOfTheWeek[now.dayOfTheWeek()]);
   display.print(now.hour(), DEC);
   display.print(":");
@@ -96,15 +114,15 @@ void loop() {
     
   display.display();
   
-  Serial.println(analogRead(A7));
-  Serial.println(analogRead(A3));
-  Serial.println(analogRead(A2)); //gas
+  Serial.println(analogRead(BUTTONPIN1));
+  Serial.println(analogRead(BUTTONPIN2));
+  Serial.println(analogRead(GASPIN)); //gas
   //Serial.println(analogRead(A1)); //vibro
-  //Serial.println(analogRead(A0)); flash
+  //Serial.println(analogRead(A0)); //flash
   if (analogRead(A0) < 900 or analogRead(A2) > 200) {
-    analogWrite (10, 255);
+    analogWrite (BUZZERPIN, 255);
     delay (50);
-    analogWrite (10, 0);
+    analogWrite (BUZZERPIN, 0);
   }
 }
 
