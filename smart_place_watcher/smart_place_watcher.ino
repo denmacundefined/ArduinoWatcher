@@ -24,14 +24,14 @@
 #include <Wire.h>
 #include <RTClib.h>
 
+// class section
+
+
 // create object section
 RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYSCEPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
-
-// class section
-
 
 // config section
 void setup() {
