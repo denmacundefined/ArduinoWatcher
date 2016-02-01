@@ -26,7 +26,7 @@
 
 // create object section
 RTC_DS1307 rtc;
-Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYLEDPIN);
+Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYSCEPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
 
@@ -35,9 +35,8 @@ Adafruit_BMP085 bmp;
 
 // config section
 void setup() {
-  //debug
-  Serial.begin(9600);
   
+  // set pin type 
   pinMode(BUTTONPIN1, INPUT);
   pinMode(BUTTONPIN2, INPUT);
   pinMode(GASPIN, INPUT);
@@ -46,12 +45,18 @@ void setup() {
   pinMode(DISPLAYLEDPIN, OUTPUT);
   pinMode(LIGHTPIN, INPUT);
   pinMode (BUZZERPIN, OUTPUT);
+  
+  // init display
   display.begin();
+   
+  // init temp
   dht.begin();
   if (!bmp.begin()) {
     Serial.println("Could not find a valid BMP085 sensor, check wiring!");
     while (1);
   }
+  
+  // init time 
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
     while (1);
@@ -78,15 +83,11 @@ void loop() {
   } else {
     digitalWrite(DISPLAYLEDPIN, LOW);
   }
-  
   display.clearDisplay();
   display.setContrast(40);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
-
-  
-
   display.print(now.year(), DEC);
   display.print("/");
   display.print(now.month(), DEC);
@@ -110,16 +111,14 @@ void loop() {
   display.print(altitude);
   display.print(" метр.)(");
   display.print(t2);
-  display.print(" град.2)");
-    
-  display.display();
-  
+  display.print(" град.2)");  
+  display.display(); 
   Serial.println(analogRead(BUTTONPIN1));
   Serial.println(analogRead(BUTTONPIN2));
   Serial.println(analogRead(GASPIN)); //gas
-  //Serial.println(analogRead(A1)); //vibro
-  //Serial.println(analogRead(A0)); //flash
-  if (analogRead(A0) < 900 or analogRead(A2) > 200) {
+  //Serial.println(analogRead(VIBROPIN)); //vibro
+  //Serial.println(analogRead(FLAMEPIN)); //flash
+  if (analogRead(FLAMEPIN) < 900 or analogRead(GASPIN) > 200) {
     analogWrite (BUZZERPIN, 255);
     delay (50);
     analogWrite (BUZZERPIN, 0);
