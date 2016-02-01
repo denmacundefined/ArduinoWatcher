@@ -29,7 +29,7 @@
 
 // create object section
 RTC_DS1307 rtc;
-Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYSCEPIN);
+Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
 
@@ -84,7 +84,7 @@ void loop() {
     digitalWrite(DISPLAYLEDPIN, LOW);
   }
   display.clearDisplay();
-  display.setContrast(45);
+  display.setContrast(47);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
