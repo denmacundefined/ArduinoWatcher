@@ -11,6 +11,7 @@
 #define BUTTONPIN2 A3
 #define GASPIN A2
 #define VIBROPIN A1
+#define VIBROGROUNDPIN 13
 #define FLAMEPIN A0
 #define LIGHTPIN A6
 #define BUZZERPIN 10
@@ -45,6 +46,10 @@ void setup() {
   pinMode(DISPLAYLEDPIN, OUTPUT);
   pinMode(LIGHTPIN, INPUT);
   pinMode (BUZZERPIN, OUTPUT);
+  pinMode (VIBROGROUNDPIN, OUTPUT);
+  
+  // init vibrosensor
+  digitalWrite(VIBROGROUNDPIN, LOW);
   
   // init display
   display.begin();
@@ -56,6 +61,24 @@ void setup() {
     while (1);
   }
   
+  // init wifi
+  /*Serial.begin(115200);
+  Serial.setTimeout(5000);
+  display.clearDisplay();
+  display.setContrast(47);
+  display.setCursor(0, 0);
+  display.setTextColor(BLACK);
+  display.setTextSize(1);
+  Serial.println("AT+RST");
+  delay(1000);
+  if (Serial.find("ready")) {
+    display.print("WiFi - Module is ready");
+  }else{
+    display.print("Module dosn't respond.");
+    while(1);
+  }
+  display.display();*/
+  
   // init time 
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -66,6 +89,9 @@ void setup() {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
   //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
+  
+  //debug
+  Serial.begin(9600);
 }
 
 // main section
@@ -88,6 +114,7 @@ void loop() {
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
   display.setTextSize(1);
+  
   display.print(now.year(), DEC);
   display.print("/");
   display.print(now.month(), DEC);
@@ -113,12 +140,13 @@ void loop() {
   display.print(t2);
   display.print(" град.2)");  
   display.display(); 
-  Serial.println(analogRead(BUTTONPIN1));
-  Serial.println(analogRead(BUTTONPIN2));
-  Serial.println(analogRead(GASPIN)); //gas
+  
+  //Serial.println(analogRead(BUTTONPIN1));
+  //Serial.println(analogRead(BUTTONPIN2));
+  //Serial.println(analogRead(GASPIN)); //gas
   //Serial.println(analogRead(VIBROPIN)); //vibro
   //Serial.println(analogRead(FLAMEPIN)); //flash
-  if (analogRead(FLAMEPIN) < 900 or analogRead(GASPIN) > 200) {
+  if (analogRead(FLAMEPIN) < 300 or analogRead(GASPIN) > 200 or analogRead(VIBROPIN) > 600) {
     analogWrite (BUZZERPIN, 255);
     delay (50);
     analogWrite (BUZZERPIN, 0);
