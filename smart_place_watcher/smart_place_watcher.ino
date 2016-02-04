@@ -28,12 +28,13 @@
 #include <RTClib.h>
 #include <SoftwareSerial.h>
 
-// create object section
+// global variable section
 RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
-SoftwareSerial DEBUG(DEBUGRXPIN,DEBUGTXPIN);
+SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
+int DisplayIndex = 0;
 
 // config section
 void setup() {
@@ -60,61 +61,66 @@ void setup() {
    
   // init temp
   dht.begin();
+
+  // init barometr
   if (!bmp.begin()) {
-    DEBUG.println("Could not find a valid BMP085 sensor, check wiring!");
+    DEBUG.println("Could not find BMP085 sensor");
     while (1);
   }
   
   // init time 
   if (! rtc.begin()) {
-    DEBUG.println("Couldn't find RTC");
+    DEBUG.println("Could not find RTC");
     while (1);
   }
   if (! rtc.isrunning()) {
     DEBUG.println("RTC is NOT running!");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
-  //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
   
   // init wifi
   /*Serial.begin(115200);
   Serial.setTimeout(5000);
-  display.clearDisplay();
-  display.setContrast(47);
-  display.setCursor(0, 0);
-  display.setTextColor(BLACK);
-  display.setTextSize(1);
   Serial.println("AT+RST");
   delay(1000);
-  if (Serial.find("ready")) {
-    display.print("WiFi - Module is ready");
+  DEBUG.println(Serial.readString());
+  /*if (Serial.find("ready")) {
+    DEBUG.print("WiFi - Module is ready");
   }else{
-    display.print("Module dosn't respond.");
+    DEBUG.print("Module dosn't respond.");
     while(1);
-  }
-  display.display();*/
+  }*/
   
 }
 
 // main section
 void loop() { 
-  String userTime = "";
-  DateTime now = rtc.now();
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float t2 = bmp.readTemperature();
-  long pressure = bmp.readPressure();
-  int altitude = bmp.readAltitude();
-  int light = analogRead(LIGHTPIN);
-  if (light < 100) {
-    digitalWrite(DISPLAYLEDPIN, HIGH);
-  } else {
-    digitalWrite(DISPLAYLEDPIN, LOW);
-  }
-  display.clearDisplay();
-  display.setContrast(47);
+  
+  // get data from sensors
+    float h = dht.readHumidity();
+    float t = dht.readTemperature();
+    float t2 = bmp.readTemperature();
+    long pressure = bmp.readPressure();
+    int altitude = bmp.readAltitude();
+    int light = analogRead(LIGHTPIN);
+    int gas = analogRead(GASPIN);
+    int flame = analogRead(FLAMEPIN);
+    int vibro = analogRead(VIBROPIN);
+
+  // start display
+    display.clearDisplay();
+    display.setContrast(47);
+    display.setTextColor(BLACK);
+
+  // start functions
+    CheckButtons(300);
+    DisplayLedPowerOn(light, 100);
+    
+  // show information on display
+    display.display();
+
+  /* DateTime rtcnow = rtc.now();
   display.setCursor(0, 0);
-  display.setTextColor(BLACK);
   display.setTextSize(1); 
   display.print(now.year(), DEC);
   display.print("/");
@@ -141,14 +147,33 @@ void loop() {
   display.print(t2);
   display.print(" град.2)");  
   display.display(); 
-  
   DEBUG.println(analogRead(BUTTONPIN1));
   DEBUG.println(analogRead(BUTTONPIN2));
-  
   if (analogRead(FLAMEPIN) < 250 or analogRead(GASPIN) > 250 or analogRead(VIBROPIN) > 500) {
     analogWrite (BUZZERPIN, 255);
     delay (50);
     analogWrite (BUZZERPIN, 0);
+  }*/
+  
+}
+
+// function section
+void CheckButtons(int DefaultLimit) {
+  if (analogRead(BUTTONPIN1) > DefaultLimit && DefaultLimit > 0) {
+    DisplayIndex--;
+  } 
+  if (analogRead(BUTTONPIN2) > DefaultLimit && DefaultLimit >= 0) {
+    DisplayIndex++;
   }
+}
+void SetTime(int year, int month, int day, int hour, int minute, int second) { 
+  rtc.adjust(DateTime(year, month, day, hour, minute, second));
+}
+void DisplayLedPowerOn(int light, int DefaultLimit) {
+  if (light < DefaultLimit) {
+    digitalWrite(DISPLAYLEDPIN, HIGH);
+  } else {
+    digitalWrite(DISPLAYLEDPIN, LOW);
+  }  
 }
 
