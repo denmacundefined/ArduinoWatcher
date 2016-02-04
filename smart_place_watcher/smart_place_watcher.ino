@@ -15,6 +15,8 @@
 #define FLAMEPIN A0
 #define LIGHTPIN A6
 #define BUZZERPIN 10
+#define DEBUGTXPIN 12
+#define DEBUGRXPIN 11
 
 // include section
 #include <SPI.h>
@@ -24,18 +26,20 @@
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
 #include <RTClib.h>
-
-// class section
-
+#include <SoftwareSerial.h>
 
 // create object section
 RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
+SoftwareSerial DEBUG(DEBUGRXPIN,DEBUGTXPIN);
 
 // config section
 void setup() {
+  
+  //debug
+  DEBUG.begin(9600);
   
   // set pin type 
   pinMode(BUTTONPIN1, INPUT);
@@ -57,9 +61,20 @@ void setup() {
   // init temp
   dht.begin();
   if (!bmp.begin()) {
-    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    DEBUG.println("Could not find a valid BMP085 sensor, check wiring!");
     while (1);
   }
+  
+  // init time 
+  if (! rtc.begin()) {
+    DEBUG.println("Couldn't find RTC");
+    while (1);
+  }
+  if (! rtc.isrunning()) {
+    DEBUG.println("RTC is NOT running!");
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  }
+  //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
   
   // init wifi
   /*Serial.begin(115200);
@@ -79,19 +94,6 @@ void setup() {
   }
   display.display();*/
   
-  // init time 
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-  if (! rtc.isrunning()) {
-    Serial.println("RTC is NOT running!");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
-  //rtc.adjust(DateTime(2016, 1, 4, 14, 05, 0));
-  
-  //debug
-  Serial.begin(9600);
 }
 
 // main section
@@ -113,8 +115,7 @@ void loop() {
   display.setContrast(47);
   display.setCursor(0, 0);
   display.setTextColor(BLACK);
-  display.setTextSize(1);
-  
+  display.setTextSize(1); 
   display.print(now.year(), DEC);
   display.print("/");
   display.print(now.month(), DEC);
@@ -141,12 +142,10 @@ void loop() {
   display.print(" град.2)");  
   display.display(); 
   
-  //Serial.println(analogRead(BUTTONPIN1));
-  //Serial.println(analogRead(BUTTONPIN2));
-  //Serial.println(analogRead(GASPIN)); //gas
-  //Serial.println(analogRead(VIBROPIN)); //vibro
-  //Serial.println(analogRead(FLAMEPIN)); //flash
-  if (analogRead(FLAMEPIN) < 300 or analogRead(GASPIN) > 200 or analogRead(VIBROPIN) > 600) {
+  DEBUG.println(analogRead(BUTTONPIN1));
+  DEBUG.println(analogRead(BUTTONPIN2));
+  
+  if (analogRead(FLAMEPIN) < 250 or analogRead(GASPIN) > 250 or analogRead(VIBROPIN) > 500) {
     analogWrite (BUZZERPIN, 255);
     delay (50);
     analogWrite (BUZZERPIN, 0);
