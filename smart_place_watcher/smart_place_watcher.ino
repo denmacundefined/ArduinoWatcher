@@ -113,14 +113,14 @@ void loop() {
     display.setTextColor(BLACK);
 
   // start functions
-    CheckButtons(300);
+    CheckButtons(100);
     //DisplayLedPowerOn(light, 100);
     //PowerOnSignalExpression(flame, 250, 10, false);
     //PowerOnSignalExpression(gas, 250, 10, true);
     //PowerOnSignalExpression(vibro, 500, 10, true);
 
-    DEBUG.print(analogRead(BUTTONPIN1));
-    DEBUG.print(analogRead(BUTTONPIN2));    
+    DEBUG.println(analogRead(BUTTONPIN1));
+    DEBUG.println(analogRead(BUTTONPIN2));    
     
   // show information on display
     SetView();
@@ -171,16 +171,17 @@ void SetView () {
   void ShowTime () {
     DateTime rtcnow = rtc.now();
     display.setCursor(0, 0);
-    display.setTextSize(3); 
-    display.print(rtcnow.year(), DEC);
+    display.setTextSize(1); 
+    char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "Пятниця", "Субота"};
+    display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
+    display.println(rtcnow.day(), DEC);
     display.print("/");
     display.print(rtcnow.month(), DEC);
     display.print("/");
-    display.print(rtcnow.day(), DEC);
-    display.print(" ");
-    char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "Пятниця", "Субота"};
-    display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
-    display.print(rtcnow.hour(), DEC);
+    display.print(rtcnow.year(), DEC);
+
+    display.setTextSize(2);
+    display.println(rtcnow.hour(), DEC);
     display.print(":");
     display.print(rtcnow.minute(), DEC);
     display.print(":");
