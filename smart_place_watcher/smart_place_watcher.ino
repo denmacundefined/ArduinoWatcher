@@ -114,47 +114,21 @@ void loop() {
 
   // start functions
     CheckButtons(300);
-    DisplayLedPowerOn(light, 100);
-    PowerOnSignalExpression(flame, 250, 10, false);
-    PowerOnSignalExpression(gas, 250, 10, true);
-    PowerOnSignalExpression(vibro, 500, 10, true);
+    //DisplayLedPowerOn(light, 100);
+    //PowerOnSignalExpression(flame, 250, 10, false);
+    //PowerOnSignalExpression(gas, 250, 10, true);
+    //PowerOnSignalExpression(vibro, 500, 10, true);
+
+    DEBUG.printls(analogRead(BUTTONPIN1));
+    DEBUG.printls(analogRead(BUTTONPIN2));    
     
   // show information on display
+    SetView();
     display.display();
-
-  /* DateTime rtcnow = rtc.now();
-  display.setCursor(0, 0);
-  display.setTextSize(1); 
-  display.print(now.year(), DEC);
-  display.print("/");
-  display.print(now.month(), DEC);
-  display.print("/");
-  display.print(now.day(), DEC);
-  display.print(" ");
-  char daysOfTheWeek[7][12] = {"Нед.", "Пон.", "Вiв.", "Сер.", "Чет.", "Пят.", "Суб."};
-  display.print(daysOfTheWeek[now.dayOfTheWeek()]);
-  display.print(now.hour(), DEC);
-  display.print(":");
-  display.print(now.minute(), DEC);
-  display.print(":");
-  display.print(now.second(), DEC);
-  display.print("(");
-  display.print(h);
-  display.print(" % вод.)(");
-  display.print(t);
-  display.print(" град.)(");
-  display.print(pressure);
-  display.print(" паск.)(");
-  display.print(altitude);
-  display.print(" метр.)(");
-  display.print(t2);
-  display.print(" град.2)");  
-  display.display(); */
-  
 }
 
 // function section
-void CheckButtons(int DefaultLimit) {
+void CheckButtons (int DefaultLimit) {
   if (analogRead(BUTTONPIN1) > DefaultLimit && DefaultLimit > 0) {
     DisplayIndex--;
   } 
@@ -175,15 +149,52 @@ void PowerOnSignalExpression (int value, int checkValue, int interval, boolean m
     analogWrite (BUZZERPIN, 0);
   }
 }
-
-void SetTime(int year, int month, int day, int hour, int minute, int second) { 
+void SetTime (int year, int month, int day, int hour, int minute, int second) { 
   rtc.adjust(DateTime(year, month, day, hour, minute, second));
 }
-void DisplayLedPowerOn(int light, int DefaultLimit) {
+void DisplayLedPowerOn (int light, int DefaultLimit) {
   if (light < DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, HIGH);
   } else {
     digitalWrite(DISPLAYLEDPIN, LOW);
   }  
 }
+void SetView () {
+  switch (DisplayIndex) {
+    case 0 :
+      ShowTime();
+    break;
+  }
+}
+
+  // views
+  void ShowTime () {
+    DateTime rtcnow = rtc.now();
+    display.setCursor(0, 0);
+    display.setTextSize(1); 
+    display.print(now.year(), DEC);
+    display.print("/");
+    display.print(now.month(), DEC);
+    display.print("/");
+    display.print(now.day(), DEC);
+    display.print(" ");
+    char daysOfTheWeek[7][12] = {"Нед.", "Пон.", "Вiв.", "Сер.", "Чет.", "Пят.", "Суб."};
+    display.print(daysOfTheWeek[now.dayOfTheWeek()]);
+    display.print(now.hour(), DEC);
+    display.print(":");
+    display.print(now.minute(), DEC);
+    display.print(":");
+    display.print(now.second(), DEC);
+    display.print("(");
+    display.print(h);
+    display.print(" % вод.)(");
+    display.print(t);
+    display.print(" град.)(");
+    display.print(pressure);
+    display.print(" паск.)(");
+    display.print(altitude);
+    display.print(" метр.)(");
+    display.print(t2);
+    display.print(" град.2)");  
+  }
 
