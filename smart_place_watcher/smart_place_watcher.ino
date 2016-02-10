@@ -174,14 +174,17 @@ void SetView () {
     display.setTextSize(1); 
     char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "Пятниця", "Субота"};
     display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
+
+    display.setCursor(0, 3);
     display.println(rtcnow.day(), DEC);
     display.print("/");
     display.print(rtcnow.month(), DEC);
     display.print("/");
     display.print(rtcnow.year(), DEC);
 
+    display.setCursor(0, 10);
     display.setTextSize(2);
-    display.println(rtcnow.hour(), DEC);
+    display.print(rtcnow.hour(), DEC);
     display.print(":");
     display.print(rtcnow.minute(), DEC);
     display.print(":");
