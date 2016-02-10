@@ -171,7 +171,7 @@ void SetView () {
   void ShowTime () {
     DateTime rtcnow = rtc.now();
     display.setCursor(0, 0);
-    display.setTextSize(1); 
+    display.setTextSize(3); 
     display.print(now.year(), DEC);
     display.print("/");
     display.print(now.month(), DEC);
@@ -185,16 +185,5 @@ void SetView () {
     display.print(now.minute(), DEC);
     display.print(":");
     display.print(now.second(), DEC);
-    display.print("(");
-    display.print(h);
-    display.print(" % вод.)(");
-    display.print(t);
-    display.print(" град.)(");
-    display.print(pressure);
-    display.print(" паск.)(");
-    display.print(altitude);
-    display.print(" метр.)(");
-    display.print(t2);
-    display.print(" град.2)");  
   }
 
