@@ -115,6 +115,9 @@ void loop() {
   // start functions
     CheckButtons(300);
     DisplayLedPowerOn(light, 100);
+    PowerOnSignalExpression(flame, 250, 10, false);
+    PowerOnSignalExpression(gas, 250, 10, true);
+    PowerOnSignalExpression(vibro, 500, 10, true);
     
   // show information on display
     display.display();
@@ -146,14 +149,7 @@ void loop() {
   display.print(" метр.)(");
   display.print(t2);
   display.print(" град.2)");  
-  display.display(); 
-  DEBUG.println(analogRead(BUTTONPIN1));
-  DEBUG.println(analogRead(BUTTONPIN2));
-  if (analogRead(FLAMEPIN) < 250 or analogRead(GASPIN) > 250 or analogRead(VIBROPIN) > 500) {
-    analogWrite (BUZZERPIN, 255);
-    delay (50);
-    analogWrite (BUZZERPIN, 0);
-  }*/
+  display.display(); */
   
 }
 
@@ -166,6 +162,20 @@ void CheckButtons(int DefaultLimit) {
     DisplayIndex++;
   }
 }
+void PowerOnSignalExpression (int value, int checkValue, int interval, boolean more) {
+  boolean validation;
+  if (more) {
+      validation = (value > checkValue) ? true : false;
+  } else {
+      validation = (value < checkValue) ? true : false;
+  }
+  if (validation) {
+    analogWrite (BUZZERPIN, 255);
+    delay (interval);
+    analogWrite (BUZZERPIN, 0);
+  }
+}
+
 void SetTime(int year, int month, int day, int hour, int minute, int second) { 
   rtc.adjust(DateTime(year, month, day, hour, minute, second));
 }
