@@ -119,8 +119,8 @@ void loop() {
     //PowerOnSignalExpression(gas, 250, 10, true);
     //PowerOnSignalExpression(vibro, 500, 10, true);
 
-    DEBUG.printls(analogRead(BUTTONPIN1));
-    DEBUG.printls(analogRead(BUTTONPIN2));    
+    DEBUG.print(analogRead(BUTTONPIN1));
+    DEBUG.print(analogRead(BUTTONPIN2));    
     
   // show information on display
     SetView();
