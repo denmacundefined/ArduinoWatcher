@@ -114,7 +114,7 @@ void loop() {
 
   // start functions
     CheckButtons(100);
-    //DisplayLedPowerOn(light, 100);
+    DisplayLedPowerOn(light, 100);
     //PowerOnSignalExpression(flame, 250, 10, false);
     //PowerOnSignalExpression(gas, 250, 10, true);
     //PowerOnSignalExpression(vibro, 500, 10, true);
@@ -170,24 +170,23 @@ void SetView () {
   // views
   void ShowTime () {
     DateTime rtcnow = rtc.now();
-    display.setCursor(0, 0);
+    display.setCursor(18, 0);
     display.setTextSize(1); 
-    char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "Пятниця", "Субота"};
+    char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
     display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
-
-    display.setCursor(0, 3);
+    display.setCursor(14, 10);
     display.println(rtcnow.day(), DEC);
     display.print("/");
     display.print(rtcnow.month(), DEC);
     display.print("/");
     display.print(rtcnow.year(), DEC);
-
-    display.setCursor(0, 10);
+    display.setCursor(12, 25);
     display.setTextSize(2);
     display.print(rtcnow.hour(), DEC);
-    display.print(":");
+    display.print("-");
     display.print(rtcnow.minute(), DEC);
-    display.print(":");
+    display.setTextSize(1);
+    display.setCursor(36, 22);
     display.print(rtcnow.second(), DEC);
   }
 
