@@ -97,43 +97,60 @@ void setup() {
 void loop() { 
   
   // get data from sensors
-    float h = dht.readHumidity();
-    float t = dht.readTemperature();
-    float t2 = bmp.readTemperature();
+    float humidity = dht.readHumidity();
+    float temp = dht.readTemperature();
+    float tempFromBarometr = bmp.readTemperature();
     long pressure = bmp.readPressure();
     int altitude = bmp.readAltitude();
     int light = analogRead(LIGHTPIN);
     int gas = analogRead(GASPIN);
     int flame = analogRead(FLAMEPIN);
     int vibro = analogRead(VIBROPIN);
+    int button1 = analogRead(BUTTONPIN1);
+    int button2 = analogRead(BUTTONPIN2);
 
-  // start display
+  // start display and set view
     display.clearDisplay();
     display.setContrast(47);
-    display.setTextColor(BLACK);
-
-  // start functions
-    CheckButtons(100);
-    DisplayLedPowerOn(light, 100);
-    //PowerOnSignalExpression(flame, 250, 10, false);
-    //PowerOnSignalExpression(gas, 250, 10, true);
-    //PowerOnSignalExpression(vibro, 500, 10, true);
-
-    DEBUG.println(analogRead(BUTTONPIN1));
-    DEBUG.println(analogRead(BUTTONPIN2));    
-    
-  // show information on display
-    SetView();
+    display.setTextColor(BLACK);    
+    switch (DisplayIndex) {
+      case 0 :
+        ShowTime();
+      break;
+      case 1:
+        ShowTempAndHumidity(temp, humidity);
+      break;
+      case 2:
+        ShowPressureAndAltitude(pressure, altitude);
+      break;
+      case 3:
+        ShowLightAndTemp2(light, tempFromBarometr);
+      break;
+      case 4:
+        ShowGasAndFlame(gas, flame);
+      break;
+      case 5:
+        ShowVibro(vibro);
+      break;
+    }
     display.display();
+    
+  // start functions
+    CheckButtons(100, button1, button2, 5, 0);
+    DisplayLedPowerOn(light, 100);
+    PowerOnSignalExpression(flame, 900, 10, false);
+    PowerOnSignalExpression(gas, 100, 10, true);
 }
 
 // function section
-void CheckButtons (int DefaultLimit) {
-  if (analogRead(BUTTONPIN1) > DefaultLimit && DefaultLimit > 0) {
+void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit, int TimeDelay) {
+  if ((Decrement > DefaultLimit) && (DisplayIndex > 0)) {
     DisplayIndex--;
+    delay(TimeDelay);
   } 
-  if (analogRead(BUTTONPIN2) > DefaultLimit && DefaultLimit >= 0) {
+  if ((Increment > DefaultLimit) && (DisplayIndex < MaxLimit)) {
     DisplayIndex++;
+    delay(TimeDelay);
   }
 }
 void PowerOnSignalExpression (int value, int checkValue, int interval, boolean more) {
@@ -159,13 +176,6 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, LOW);
   }  
 }
-void SetView () {
-  switch (DisplayIndex) {
-    case 0 :
-      ShowTime();
-    break;
-  }
-}
 
   // views
   void ShowTime () {
@@ -188,5 +198,65 @@ void SetView () {
     display.setTextSize(1);
     display.setCursor(36, 22);
     display.print(rtcnow.second(), DEC);
+  }
+  void ShowTempAndHumidity (int Temp, int Humidity) {
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print("Температура:");
+    display.setCursor(10, 10);
+    display.print(Temp);
+    display.print(" градусiв");
+    display.setCursor(0, 25);
+    display.print("Вологiсть: ");
+    display.setCursor(10, 35);
+    display.print(Humidity);
+    display.print(" процентiв");
+  }
+  void ShowPressureAndAltitude(int pressure, int altitude) {
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print("Тиск:");
+    display.setCursor(5, 10);
+    display.print(pressure, DEC);
+    display.print(" паск.");
+    display.setCursor(0, 25);
+    display.print("Висота: ");
+    display.setCursor(10, 35);
+    display.print(altitude, DEC);
+    display.print(" метрiв");
+  }
+  void ShowLightAndTemp2 (int light, int temp) {
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print("Освiтлення:");
+    display.setCursor(10, 10);
+    display.print(light, DEC);
+    display.print(" число");
+    display.setCursor(0, 20);
+    display.print("Температура з барометра: ");
+    display.setCursor(10, 38);
+    display.print(temp, DEC);
+    display.print(" градусiв");
+  }
+  void ShowGasAndFlame (int gas, int flame) {
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print("Гази:");
+    display.setCursor(10, 10);
+    display.print(gas, DEC);
+    display.print(" число");
+    display.setCursor(0, 25);
+    display.print("Вогонь: ");
+    display.setCursor(10, 35);
+    display.print(flame, DEC);
+    display.print(" число");
+  }
+  void ShowVibro (int vibro) {
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print("Вiбрацiя:");
+    display.setCursor(10, 10);
+    display.print(vibro, DEC);
+    display.print(" число");
   }
 
