@@ -138,8 +138,8 @@ void loop() {
   // start functions
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, 100);
-    PowerOnSignalExpression(flame, 900, 10, false);
-    PowerOnSignalExpression(gas, 100, 10, true);
+    PowerOnSignalExpression(flame, 900, 50, false);
+    PowerOnSignalExpression(gas, 100, 50, true);
 }
 
 // function section
