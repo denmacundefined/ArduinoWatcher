@@ -17,6 +17,7 @@
 #define BUZZERPIN 10
 #define DEBUGTXPIN 12
 #define DEBUGRXPIN 11
+#define SOUNDPIN 9
 
 // include section
 #include <SPI.h>
@@ -108,6 +109,7 @@ void loop() {
     int vibro = analogRead(VIBROPIN);
     int button1 = analogRead(BUTTONPIN1);
     int button2 = analogRead(BUTTONPIN2);
+    int sound = analogRead(SOUNDPIN);
 
   // start display and set view
     display.clearDisplay();
@@ -130,7 +132,7 @@ void loop() {
         ShowGasAndFlame(gas, flame);
       break;
       case 5:
-        ShowVibro(vibro);
+        ShowVibroAndSound(vibro, sound);
       break;
     }
     display.display();
@@ -251,12 +253,17 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
     display.print(flame, DEC);
     display.print(" число");
   }
-  void ShowVibro (int vibro) {
+  void ShowVibroAndSound (int vibro, int sound) {
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.print("Вiбрацiя:");
     display.setCursor(10, 10);
     display.print(vibro, DEC);
+    display.print(" число");
+    display.setCursor(0, 25);
+    display.print("Звук: ");
+    display.setCursor(10, 35);
+    display.print(sound, DEC);
     display.print(" число");
   }
 
