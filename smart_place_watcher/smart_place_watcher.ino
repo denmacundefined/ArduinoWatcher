@@ -17,7 +17,7 @@
 #define BUZZERPIN 10
 #define DEBUGTXPIN 12
 #define DEBUGRXPIN 11
-#define SOUNDPIN 9
+#define SOUNDPIN 8
 
 // include section
 #include <SPI.h>
