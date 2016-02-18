@@ -51,6 +51,7 @@ void setup() {
   pinMode(FLAMEPIN, INPUT);
   pinMode(DISPLAYLEDPIN, OUTPUT);
   pinMode(LIGHTPIN, INPUT);
+  pinMode(SOUNDPIN, INPUT);
   pinMode (BUZZERPIN, OUTPUT);
   pinMode (VIBROGROUNDPIN, OUTPUT);
   
