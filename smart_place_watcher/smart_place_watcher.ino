@@ -17,7 +17,7 @@
 #define BUZZERPIN 10
 #define DEBUGTXPIN 12
 #define DEBUGRXPIN 11
-#define SOUNDPIN 8
+#define OTHERPIN 8
 
 // include section
 #include <SPI.h>
@@ -51,9 +51,9 @@ void setup() {
   pinMode(FLAMEPIN, INPUT);
   pinMode(DISPLAYLEDPIN, OUTPUT);
   pinMode(LIGHTPIN, INPUT);
-  pinMode(SOUNDPIN, INPUT);
-  pinMode (BUZZERPIN, OUTPUT);
-  pinMode (VIBROGROUNDPIN, OUTPUT);
+  pinMode(OTHERPIN, OUTPUT);
+  pinMode(BUZZERPIN, OUTPUT);
+  pinMode(VIBROGROUNDPIN, OUTPUT);
   
   // init vibrosensor
   digitalWrite(VIBROGROUNDPIN, LOW);
@@ -110,7 +110,6 @@ void loop() {
     int vibro = analogRead(VIBROPIN);
     int button1 = analogRead(BUTTONPIN1);
     int button2 = analogRead(BUTTONPIN2);
-    int sound = analogRead(SOUNDPIN);
 
   // start display and set view
     display.clearDisplay();
@@ -133,7 +132,7 @@ void loop() {
         ShowGasAndFlame(gas, flame);
       break;
       case 5:
-        ShowVibroAndSound(vibro, sound);
+        ShowVibro(vibro);
       break;
     }
     display.display();
@@ -141,7 +140,7 @@ void loop() {
   // start functions
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, 100);
-    PowerOnSignalExpression(flame, 900, 50, false);
+    PowerOnSignalExpression(flame, 700, 50, false);
     PowerOnSignalExpression(gas, 100, 50, true);
 }
 
@@ -175,8 +174,10 @@ void SetTime (int year, int month, int day, int hour, int minute, int second) {
 void DisplayLedPowerOn (int light, int DefaultLimit) {
   if (light < DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, HIGH);
+    digitalWrite(OTHERPIN, HIGH);
   } else {
     digitalWrite(DISPLAYLEDPIN, LOW);
+    digitalWrite(OTHERPIN, LOW);
   }  
 }
 
@@ -233,12 +234,12 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
     display.setTextSize(1);
     display.print("Освiтлення:");
     display.setCursor(10, 10);
-    display.print(light, DEC);
+    display.print(light);
     display.print(" число");
     display.setCursor(0, 20);
     display.print("Температура з барометра: ");
     display.setCursor(10, 38);
-    display.print(temp, DEC);
+    display.print(temp);
     display.print(" градусiв");
   }
   void ShowGasAndFlame (int gas, int flame) {
@@ -246,25 +247,20 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
     display.setTextSize(1);
     display.print("Гази:");
     display.setCursor(10, 10);
-    display.print(gas, DEC);
+    display.print(gas);
     display.print(" число");
     display.setCursor(0, 25);
     display.print("Вогонь: ");
     display.setCursor(10, 35);
-    display.print(flame, DEC);
+    display.print(flame);
     display.print(" число");
   }
-  void ShowVibroAndSound (int vibro, int sound) {
+  void ShowVibro (int vibro) {
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.print("Вiбрацiя:");
     display.setCursor(10, 10);
-    display.print(vibro, DEC);
-    display.print(" число");
-    display.setCursor(0, 25);
-    display.print("Звук: ");
-    display.setCursor(10, 35);
-    display.print(sound, DEC);
+    display.print(vibro);
     display.print(" число");
   }
 
