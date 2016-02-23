@@ -81,7 +81,7 @@ void setup() {
     DEBUG.println("RTC is NOT running!");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
-  
+
   // init wifi
   /*Serial.begin(115200);
   Serial.setTimeout(5000);
@@ -99,7 +99,7 @@ void setup() {
 
 // main section
 void loop() { 
-  
+  Serial.println(digitalRead(EDITPIN));
   // get data from sensors
     float humidity = dht.readHumidity();
     float temp = dht.readTemperature();
@@ -112,8 +112,10 @@ void loop() {
     int vibro = analogRead(VIBROPIN);
     int button1 = analogRead(BUTTONPIN1);
     int button2 = analogRead(BUTTONPIN2);
+    boolean editButton = digitalRead(EDITPIN);
     
   // start functions
+    InitEditMode(editButton, 0);
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, 100);
     PowerOnSignalExpression(flame, 700, 50, false);
@@ -126,7 +128,7 @@ void loop() {
     if (EditMode) {
       switch (DisplayIndex) {
         case 0 :
-          
+          display.print("ай бля едiт");
         break;
       }
     } else {    
@@ -155,6 +157,21 @@ void loop() {
 }
 
 // function section
+void InitEditMode (boolean value, int Limit) {
+  if (!value) {
+    if (EditMode) {
+      if (DisplayIndex > Limit) {
+        DisplayIndex = 0;
+        EditMode = false;
+      } else {
+        DisplayIndex++;
+      }    
+    } else {
+      EditMode = true;
+      DisplayIndex = 0;
+    }
+  }
+}
 void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit, int TimeDelay) {
   if (EditMode) {
     if ((Decrement > DefaultLimit)) {
