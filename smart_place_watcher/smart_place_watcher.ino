@@ -17,7 +17,7 @@
 #define BUZZERPIN 10
 #define DEBUGTXPIN 12
 #define DEBUGRXPIN 11
-#define OTHERPIN 8
+#define EDITPIN 8
 
 // include section
 #include <SPI.h>
@@ -36,6 +36,8 @@ DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
 SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
 int DisplayIndex = 0;
+int EditModeValue = 0;
+boolean EditMode = false;
 
 // config section
 void setup() {
@@ -51,7 +53,7 @@ void setup() {
   pinMode(FLAMEPIN, INPUT);
   pinMode(DISPLAYLEDPIN, OUTPUT);
   pinMode(LIGHTPIN, INPUT);
-  pinMode(OTHERPIN, OUTPUT);
+  pinMode(EDITPIN, INPUT);
   pinMode(BUZZERPIN, OUTPUT);
   pinMode(VIBROGROUNDPIN, OUTPUT);
   
@@ -110,49 +112,68 @@ void loop() {
     int vibro = analogRead(VIBROPIN);
     int button1 = analogRead(BUTTONPIN1);
     int button2 = analogRead(BUTTONPIN2);
-
-  // start display and set view
-    display.clearDisplay();
-    display.setContrast(47);
-    display.setTextColor(BLACK);    
-    switch (DisplayIndex) {
-      case 0 :
-        ShowTime();
-      break;
-      case 1:
-        ShowTempAndHumidity(temp, humidity);
-      break;
-      case 2:
-        ShowPressureAndAltitude(pressure, altitude);
-      break;
-      case 3:
-        ShowLightAndTemp2(light, tempFromBarometr);
-      break;
-      case 4:
-        ShowGasAndFlame(gas, flame);
-      break;
-      case 5:
-        ShowVibro(vibro);
-      break;
-    }
-    display.display();
     
   // start functions
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, 100);
     PowerOnSignalExpression(flame, 700, 50, false);
     PowerOnSignalExpression(gas, 100, 50, true);
+
+  // start display and set view
+    display.clearDisplay();
+    display.setContrast(47);
+    display.setTextColor(BLACK);
+    if (EditMode) {
+      switch (DisplayIndex) {
+        case 0 :
+          
+        break;
+      }
+    } else {    
+      switch (DisplayIndex) {
+        case 0 :
+          ShowTime();
+        break;
+        case 1:
+          ShowTempAndHumidity(temp, humidity);
+        break;
+        case 2:
+          ShowPressureAndAltitude(pressure, altitude);
+        break;
+        case 3:
+          ShowLightAndTemp2(light, tempFromBarometr);
+        break;
+        case 4:
+          ShowGasAndFlame(gas, flame);
+        break;
+        case 5:
+          ShowVibro(vibro);
+        break;
+      }
+    }
+    display.display();
 }
 
 // function section
 void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit, int TimeDelay) {
-  if ((Decrement > DefaultLimit) && (DisplayIndex > 0)) {
-    DisplayIndex--;
-    delay(TimeDelay);
-  } 
-  if ((Increment > DefaultLimit) && (DisplayIndex < MaxLimit)) {
-    DisplayIndex++;
-    delay(TimeDelay);
+  if (EditMode) {
+    if ((Decrement > DefaultLimit)) {
+      EditModeValue--;
+      delay(TimeDelay);
+    } 
+    if ((Increment > DefaultLimit)) {
+      EditModeValue++;
+      delay(TimeDelay);
+    }
+  } else {
+    if ((Decrement > DefaultLimit) && (DisplayIndex > 0)) {
+      DisplayIndex--;
+      delay(TimeDelay);
+    } 
+    if ((Increment > DefaultLimit) && (DisplayIndex < MaxLimit)) {
+      DisplayIndex++;
+      delay(TimeDelay);
+    }
   }
 }
 void PowerOnSignalExpression (int value, int checkValue, int interval, boolean more) {
@@ -174,10 +195,8 @@ void SetTime (int year, int month, int day, int hour, int minute, int second) {
 void DisplayLedPowerOn (int light, int DefaultLimit) {
   if (light < DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, HIGH);
-    digitalWrite(OTHERPIN, HIGH);
   } else {
     digitalWrite(DISPLAYLEDPIN, LOW);
-    digitalWrite(OTHERPIN, LOW);
   }  
 }
 
