@@ -39,7 +39,7 @@ SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
 int DisplayIndex = 0;
 int EditModeValue = 0;
 boolean EditMode = false;
-int config[5];
+int TimeConfig[5];
 
 // config section
 void setup() {
@@ -64,6 +64,7 @@ void setup() {
   
   // init display
   display.begin();
+  display.setContrast(EEPROM.read(0) || 50);
    
   // init temp
   dht.begin();
@@ -125,7 +126,6 @@ void loop() {
 
   // start display and set view
     display.clearDisplay();
-    display.setContrast(47);
     display.setTextColor(BLACK);
     if (EditMode) {
       switch (DisplayIndex) {
@@ -145,7 +145,8 @@ void loop() {
           SetMinute();
         break;
         case 5 :
-          rtc.adjust(DateTime(config[0], config[1], config[2], config[3], config[4], 0)); //year, month, day, hour, minute
+          rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
+          SetContrast();
         break;
       }
     } else {    
@@ -327,63 +328,76 @@ void SetYear() {
   if ((EditModeValue < 2000) or (EditModeValue > 3000)) {
      EditModeValue = 2000;
   } 
-  config[0] = EditModeValue;
+  TimeConfig[0] = EditModeValue;
   display.setCursor(0, 0);
   display.setTextSize(1);
   display.print("Виберiть рiк:");
   display.setCursor(18, 20);
   display.setTextSize(2);
-  display.print(config[0]);
+  display.print(TimeConfig[0]);
 }
 
 void SetMonth() {
   if ((EditModeValue < 1) or (EditModeValue > 12)) {
      EditModeValue = 1;
   } 
-  config[1] = EditModeValue;
+  TimeConfig[1] = EditModeValue;
   display.setCursor(0, 0);
   display.setTextSize(1);
   display.print("Виберiть мiсяць:");
   display.setCursor(18, 20);
   display.setTextSize(2);
-  display.print(config[1]);
+  display.print(TimeConfig[1]);
 }
 
 void SetDay() {
   if ((EditModeValue < 1) or (EditModeValue > 31)) {
      EditModeValue = 1;
   } 
-  config[2] = EditModeValue;
+  TimeConfig[2] = EditModeValue;
   display.setCursor(0, 0);
   display.setTextSize(1);
   display.print("Виберiть день:");
   display.setCursor(18, 20);
   display.setTextSize(2);
-  display.print(config[2]);
+  display.print(TimeConfig[2]);
 }
 
 void SetHour() {
   if ((EditModeValue < 0) or (EditModeValue > 23)) {
      EditModeValue = 0;
   } 
-  config[3] = EditModeValue;
+  TimeConfig[3] = EditModeValue;
   display.setCursor(0, 0);
   display.setTextSize(1);
   display.print("Виберiть годину:");
   display.setCursor(18, 20);
   display.setTextSize(2);
-  display.print(config[3]);
+  display.print(TimeConfig[3]);
 }
 
 void SetMinute() {
   if ((EditModeValue < 0) or (EditModeValue > 59)) {
      EditModeValue = 0;
   } 
-  config[4] = EditModeValue;
+  TimeConfig[4] = EditModeValue;
   display.setCursor(0, 0);
   display.setTextSize(1);
   display.print("Виберiть хвилину:");
   display.setCursor(18, 20);
   display.setTextSize(2);
-  display.print(config[4]);
+  display.print(TimeConfig[4]);
+}
+
+void SetContrast() {
+  if ((EditModeValue < 0) or (EditModeValue > 100)) {
+     EditModeValue = 0;
+  } 
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть рiвень контрасту:");
+  display.setCursor(18, 25);
+  display.setTextSize(2);
+  EEPROM.write(0, EditModeValue);
+  display.print(EEPROM.read(0));
 }
