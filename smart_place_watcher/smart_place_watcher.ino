@@ -20,6 +20,7 @@
 #define EDITPIN 8
 
 // include section
+#include <EEPROM.h>
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
@@ -38,6 +39,7 @@ SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
 int DisplayIndex = 0;
 int EditModeValue = 0;
 boolean EditMode = false;
+int config[5];
 
 // config section
 void setup() {
@@ -115,7 +117,7 @@ void loop() {
     boolean editButton = digitalRead(EDITPIN);
     
   // start functions
-    InitEditMode(editButton, 0);
+    InitEditMode(editButton, 4);
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, 100);
     PowerOnSignalExpression(flame, 700, 50, false);
@@ -128,7 +130,22 @@ void loop() {
     if (EditMode) {
       switch (DisplayIndex) {
         case 0 :
-          display.print("ай бля едiт");
+          SetYear();
+        break;
+        case 1 :
+          SetMonth();
+        break;
+        case 2 :
+          SetDay();
+        break;
+        case 3 :
+          SetHour();
+        break;
+        case 4 :
+          SetMinute();
+        break;
+        case 5 :
+          rtc.adjust(DateTime(config[0], config[1], config[2], config[3], config[4], 0)); //year, month, day, hour, minute
         break;
       }
     } else {    
@@ -172,6 +189,7 @@ void InitEditMode (boolean value, int Limit) {
     }
   }
 }
+
 void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit, int TimeDelay) {
   if (EditMode) {
     if ((Decrement > DefaultLimit)) {
@@ -193,6 +211,7 @@ void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit,
     }
   }
 }
+
 void PowerOnSignalExpression (int value, int checkValue, int interval, boolean more) {
   boolean validation;
   if (more) {
@@ -206,9 +225,7 @@ void PowerOnSignalExpression (int value, int checkValue, int interval, boolean m
     analogWrite (BUZZERPIN, 0);
   }
 }
-void SetTime (int year, int month, int day, int hour, int minute, int second) { 
-  rtc.adjust(DateTime(year, month, day, hour, minute, second));
-}
+
 void DisplayLedPowerOn (int light, int DefaultLimit) {
   if (light < DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, HIGH);
@@ -217,86 +234,156 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
   }  
 }
 
-  // views
-  void ShowTime () {
-    DateTime rtcnow = rtc.now();
-    display.setCursor(18, 0);
-    display.setTextSize(1); 
-    char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
-    display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
-    display.setCursor(14, 10);
-    display.println(rtcnow.day(), DEC);
-    display.print("/");
-    display.print(rtcnow.month(), DEC);
-    display.print("/");
-    display.print(rtcnow.year(), DEC);
-    display.setCursor(12, 25);
-    display.setTextSize(2);
-    display.print(rtcnow.hour(), DEC);
-    display.print("-");
-    display.print(rtcnow.minute(), DEC);
-    display.setTextSize(1);
-    display.setCursor(36, 22);
-    display.print(rtcnow.second(), DEC);
-  }
-  void ShowTempAndHumidity (int Temp, int Humidity) {
-    display.setCursor(0, 0);
-    display.setTextSize(1);
-    display.print("Температура:");
-    display.setCursor(10, 10);
-    display.print(Temp);
-    display.print(" градусiв");
-    display.setCursor(0, 25);
-    display.print("Вологiсть: ");
-    display.setCursor(10, 35);
-    display.print(Humidity);
-    display.print(" процентiв");
-  }
-  void ShowPressureAndAltitude(int pressure, int altitude) {
-    display.setCursor(0, 0);
-    display.setTextSize(1);
-    display.print("Тиск:");
-    display.setCursor(5, 10);
-    display.print(pressure, DEC);
-    display.print(" паск.");
-    display.setCursor(0, 25);
-    display.print("Висота: ");
-    display.setCursor(10, 35);
-    display.print(altitude, DEC);
-    display.print(" метрiв");
-  }
-  void ShowLightAndTemp2 (int light, int temp) {
-    display.setCursor(0, 0);
-    display.setTextSize(1);
-    display.print("Освiтлення:");
-    display.setCursor(10, 10);
-    display.print(light);
-    display.print(" число");
-    display.setCursor(0, 20);
-    display.print("Температура з барометра: ");
-    display.setCursor(10, 38);
-    display.print(temp);
-    display.print(" градусiв");
-  }
-  void ShowGasAndFlame (int gas, int flame) {
-    display.setCursor(0, 0);
-    display.setTextSize(1);
-    display.print("Гази:");
-    display.setCursor(10, 10);
-    display.print(gas);
-    display.print(" число");
-    display.setCursor(0, 25);
-    display.print("Вогонь: ");
-    display.setCursor(10, 35);
-    display.print(flame);
-    display.print(" число");
-  }
-  void ShowVibro (int vibro) {
-    display.setCursor(0, 0);
-    display.setTextSize(1);
-    display.print("Вiбрацiя:");
-    display.setCursor(10, 10);
-    display.print(vibro);
-    display.print(" число");
-  }
+// views
+void ShowTime () {
+  DateTime rtcnow = rtc.now();
+  display.setCursor(18, 0);
+  display.setTextSize(1); 
+  char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
+  display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
+  display.setCursor(14, 10);
+  display.println(rtcnow.day());
+  display.print("/");
+  display.print(rtcnow.month());
+  display.print("/");
+  display.print(rtcnow.year());
+  display.setCursor(12, 25);
+  display.setTextSize(2);
+  display.print(rtcnow.hour());
+  display.print("-");
+  display.print(rtcnow.minute());
+  display.setTextSize(1);
+  display.setCursor(36, 22);
+  display.print(rtcnow.second());
+}
 
+void ShowTempAndHumidity (int Temp, int Humidity) {
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Температура:");
+  display.setCursor(10, 10);
+  display.print(Temp);
+  display.print(" градусiв");
+  display.setCursor(0, 25);
+  display.print("Вологiсть: ");
+  display.setCursor(10, 35);
+  display.print(Humidity);
+  display.print(" процентiв");
+}
+
+void ShowPressureAndAltitude(long pressure, int altitude) {
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Тиск:");
+  display.setCursor(5, 10);
+  display.print(pressure);
+  display.print(" паск.");
+  display.setCursor(0, 25);
+  display.print("Висота: ");
+  display.setCursor(10, 35);
+  display.print(altitude);
+  display.print(" метрiв");
+}
+
+void ShowLightAndTemp2 (int light, int temp) {
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Освiтлення:");
+  display.setCursor(10, 10);
+  display.print(light);
+  display.print(" число");
+  display.setCursor(0, 20);
+  display.print("Температура з барометра: ");
+  display.setCursor(10, 38);
+  display.print(temp);
+  display.print(" градусiв");
+}
+
+void ShowGasAndFlame (int gas, int flame) {
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Гази:");
+  display.setCursor(10, 10);
+  display.print(gas);
+  display.print(" число");
+  display.setCursor(0, 25);
+  display.print("Вогонь: ");
+  display.setCursor(10, 35);
+  display.print(flame);
+  display.print(" число");
+}
+
+void ShowVibro (int vibro) {
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Вiбрацiя:");
+  display.setCursor(10, 10);
+  display.print(vibro);
+  display.print(" число");
+}
+
+//edit mode
+void SetYear() {
+  if ((EditModeValue < 2000) or (EditModeValue > 3000)) {
+     EditModeValue = 2000;
+  } 
+  config[0] = EditModeValue;
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть рiк:");
+  display.setCursor(18, 20);
+  display.setTextSize(2);
+  display.print(config[0]);
+}
+
+void SetMonth() {
+  if ((EditModeValue < 1) or (EditModeValue > 12)) {
+     EditModeValue = 1;
+  } 
+  config[1] = EditModeValue;
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть мiсяць:");
+  display.setCursor(18, 20);
+  display.setTextSize(2);
+  display.print(config[1]);
+}
+
+void SetDay() {
+  if ((EditModeValue < 1) or (EditModeValue > 31)) {
+     EditModeValue = 1;
+  } 
+  config[2] = EditModeValue;
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть день:");
+  display.setCursor(18, 20);
+  display.setTextSize(2);
+  display.print(config[2]);
+}
+
+void SetHour() {
+  if ((EditModeValue < 0) or (EditModeValue > 23)) {
+     EditModeValue = 0;
+  } 
+  config[3] = EditModeValue;
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть годину:");
+  display.setCursor(18, 20);
+  display.setTextSize(2);
+  display.print(config[3]);
+}
+
+void SetMinute() {
+  if ((EditModeValue < 0) or (EditModeValue > 59)) {
+     EditModeValue = 0;
+  } 
+  config[4] = EditModeValue;
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть хвилину:");
+  display.setCursor(18, 20);
+  display.setTextSize(2);
+  display.print(config[4]);
+}
