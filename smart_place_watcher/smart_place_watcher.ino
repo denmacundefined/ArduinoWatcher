@@ -64,7 +64,6 @@ void setup() {
   
   // init display
   display.begin();
-  display.setContrast(EEPROM.read(0) || 50);
    
   // init temp
   dht.begin();
@@ -102,7 +101,7 @@ void setup() {
 
 // main section
 void loop() { 
-  Serial.println(digitalRead(EDITPIN));
+
   // get data from sensors
     float humidity = dht.readHumidity();
     float temp = dht.readTemperature();
@@ -118,11 +117,11 @@ void loop() {
     boolean editButton = digitalRead(EDITPIN);
     
   // start functions
-    InitEditMode(editButton, 4);
+    InitEditMode(editButton, 6);
     CheckButtons(100, button1, button2, 5, 0);
-    DisplayLedPowerOn(light, 100);
-    PowerOnSignalExpression(flame, 700, 50, false);
-    PowerOnSignalExpression(gas, 100, 50, true);
+    DisplayLedPowerOn(light, EEPROM.read(0));
+    PowerOnSignalExpression(gas, EEPROM.read(1), 50, true);
+    PowerOnSignalExpression(flame, EEPROM.read(2), 50, false);
 
   // start display and set view
     display.clearDisplay();
@@ -146,7 +145,13 @@ void loop() {
         break;
         case 5 :
           rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
-          SetContrast();
+          SetLed();
+        break;
+        case 6 :
+          SetGas();
+        break;
+        case 7 :
+         // SetFlame();
         break;
       }
     } else {    
@@ -389,15 +394,41 @@ void SetMinute() {
   display.print(TimeConfig[4]);
 }
 
-void SetContrast() {
-  if ((EditModeValue < 0) or (EditModeValue > 100)) {
+void SetLed() {
+  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
      EditModeValue = 0;
-  } 
+  }
   display.setCursor(0, 0);
   display.setTextSize(1);
-  display.print("Виберiть рiвень контрасту:");
+  display.print("Виберiть лiмiт освiтлення:");
   display.setCursor(18, 25);
   display.setTextSize(2);
   EEPROM.write(0, EditModeValue);
-  display.print(EEPROM.read(0));
+  display.print(EditModeValue);
+}
+
+void SetGas() {
+  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
+     EditModeValue = 0;
+  }
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть лiмiт газу:");
+  display.setCursor(18, 25);
+  display.setTextSize(2);
+  EEPROM.write(1, EditModeValue);
+  display.print(EditModeValue);
+}
+
+void SetFlame() {
+  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
+     EditModeValue = 0;
+  }
+  display.setCursor(0, 0);
+  display.setTextSize(1);
+  display.print("Виберiть лiмiт вогню:");
+  display.setCursor(18, 25);
+  display.setTextSize(2);
+  EEPROM.write(2, EditModeValue);
+  display.print(EditModeValue);
 }
