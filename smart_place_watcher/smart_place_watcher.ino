@@ -46,6 +46,7 @@ void setup() {
   
   //debug
   DEBUG.begin(9600);
+  //Serial.begin(9600);
   
   // set pin type 
   pinMode(BUTTONPIN1, INPUT);
@@ -75,7 +76,7 @@ void setup() {
   }
   
   // init time 
-  if (! rtc.begin()) {
+  if (!rtc.begin()) {
     DEBUG.println("Could not find RTC");
     while (1);
   }
@@ -125,33 +126,34 @@ void loop() {
 
   // start display and set view
     display.clearDisplay();
+    display.setContrast(47);
     display.setTextColor(BLACK);
     if (EditMode) {
       switch (DisplayIndex) {
         case 0 :
-          SetYear();
+          DefaultTempleteEditTime(2000, 3000, "Виберiть рiк:", 0);
         break;
         case 1 :
-          SetMonth();
+          DefaultTempleteEditTime(1, 12, "Виберiть мiсяць:", 1);
         break;
         case 2 :
-          SetDay();
+          DefaultTempleteEditTime(1, 31, "Виберiть день:", 2);
         break;
         case 3 :
-          SetHour();
+          DefaultTempleteEditTime(0, 23, "Виберiть годину:", 3);
         break;
         case 4 :
-          SetMinute();
+          DefaultTempleteEditTime(0, 59, "Виберiть хвилину:", 4);
         break;
         case 5 :
           rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
-          SetLed();
+          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт освiтлення:", 0);
         break;
         case 6 :
-          SetGas();
+          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт газу:", 1);
         break;
         case 7 :
-         // SetFlame();
+          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт вогню:", 2);
         break;
       }
     } else {    
@@ -160,19 +162,19 @@ void loop() {
           ShowTime();
         break;
         case 1:
-          ShowTempAndHumidity(temp, humidity);
+          DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
         break;
         case 2:
-          ShowPressureAndAltitude(pressure, altitude);
+          DefaultTempleteShow("Тиск:", pressure, " паск.", "Висота: ", altitude, " метрiв");
         break;
         case 3:
-          ShowLightAndTemp2(light, tempFromBarometr);
+          DefaultTempleteShow("Освiтлення:", light, " число", "Температура з барометра: ", tempFromBarometr, " градусiв");
         break;
         case 4:
-          ShowGasAndFlame(gas, flame);
+          DefaultTempleteShow("Гази:", gas, " число", "Вогонь: ", flame, "  число");
         break;
         case 5:
-          ShowVibro(vibro);
+          DefaultTempleteShow("Вiбрацiя:", vibro, "  число", "", 0, "");
         break;
       }
     }
@@ -242,193 +244,66 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
 
 // views
 void ShowTime () {
-  DateTime rtcnow = rtc.now();
-  display.setCursor(18, 0);
-  display.setTextSize(1); 
-  char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
-  display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
-  display.setCursor(14, 10);
-  display.println(rtcnow.day());
-  display.print("/");
-  display.print(rtcnow.month());
-  display.print("/");
-  display.print(rtcnow.year());
-  display.setCursor(12, 25);
-  display.setTextSize(2);
-  display.print(rtcnow.hour());
-  display.print("-");
-  display.print(rtcnow.minute());
-  display.setTextSize(1);
-  display.setCursor(36, 22);
-  display.print(rtcnow.second());
+   DateTime rtcnow = rtc.now();
+   display.setCursor(18, 0);
+   display.setTextSize(1); 
+   char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
+   display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
+   display.setCursor(14, 10);
+   display.println(rtcnow.day(), DEC);
+   display.print("/");
+   display.print(rtcnow.month(), DEC);
+   display.print("/");
+   display.print(rtcnow.year(), DEC);
+   display.setCursor(12, 25);
+   display.setTextSize(2);
+   /*display.print(rtcnow.hour(), DEC);
+   display.print("-");
+   display.print(rtcnow.minute(), DEC);
+   display.setTextSize(1);
+   display.setCursor(36, 22);
+   display.print(rtcnow.second(), DEC); */
 }
 
-void ShowTempAndHumidity (int Temp, int Humidity) {
+void DefaultTempleteShow (char caption1[], long value1, char text1[], char caption2[], long value2, char text2[]) {
   display.setCursor(0, 0);
   display.setTextSize(1);
-  display.print("Температура:");
+  display.print(caption1);
   display.setCursor(10, 10);
-  display.print(Temp);
-  display.print(" градусiв");
-  display.setCursor(0, 25);
-  display.print("Вологiсть: ");
-  display.setCursor(10, 35);
-  display.print(Humidity);
-  display.print(" процентiв");
-}
-
-void ShowPressureAndAltitude(long pressure, int altitude) {
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Тиск:");
-  display.setCursor(5, 10);
-  display.print(pressure);
-  display.print(" паск.");
-  display.setCursor(0, 25);
-  display.print("Висота: ");
-  display.setCursor(10, 35);
-  display.print(altitude);
-  display.print(" метрiв");
-}
-
-void ShowLightAndTemp2 (int light, int temp) {
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Освiтлення:");
-  display.setCursor(10, 10);
-  display.print(light);
-  display.print(" число");
-  display.setCursor(0, 20);
-  display.print("Температура з барометра: ");
-  display.setCursor(10, 38);
-  display.print(temp);
-  display.print(" градусiв");
-}
-
-void ShowGasAndFlame (int gas, int flame) {
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Гази:");
-  display.setCursor(10, 10);
-  display.print(gas);
-  display.print(" число");
-  display.setCursor(0, 25);
-  display.print("Вогонь: ");
-  display.setCursor(10, 35);
-  display.print(flame);
-  display.print(" число");
-}
-
-void ShowVibro (int vibro) {
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Вiбрацiя:");
-  display.setCursor(10, 10);
-  display.print(vibro);
-  display.print(" число");
+  display.print(value1);
+  display.print(text1);
+  if (value2 != 0) {
+    display.setCursor(0, 22);
+    display.print(caption2);
+    display.setCursor(10, 39);
+    display.print(value2);
+    display.print(text2);
+  }
 }
 
 //edit mode
-void SetYear() {
-  if ((EditModeValue < 2000) or (EditModeValue > 3000)) {
-     EditModeValue = 2000;
-  } 
-  TimeConfig[0] = EditModeValue;
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть рiк:");
-  display.setCursor(18, 20);
-  display.setTextSize(2);
-  display.print(TimeConfig[0]);
+void DefaultTempleteEditEpprom (int minLimit, int maxLimit, char text[], int epprom ) {
+    if ((EditModeValue < minLimit) or (EditModeValue > maxLimit)) {
+       EditModeValue = minLimit;
+    } 
+    EEPROM.write(epprom, EditModeValue);
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print(text);
+    display.setCursor(18, 20);
+    display.setTextSize(2);
+    display.print(EditModeValue);
 }
 
-void SetMonth() {
-  if ((EditModeValue < 1) or (EditModeValue > 12)) {
-     EditModeValue = 1;
-  } 
-  TimeConfig[1] = EditModeValue;
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть мiсяць:");
-  display.setCursor(18, 20);
-  display.setTextSize(2);
-  display.print(TimeConfig[1]);
-}
-
-void SetDay() {
-  if ((EditModeValue < 1) or (EditModeValue > 31)) {
-     EditModeValue = 1;
-  } 
-  TimeConfig[2] = EditModeValue;
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть день:");
-  display.setCursor(18, 20);
-  display.setTextSize(2);
-  display.print(TimeConfig[2]);
-}
-
-void SetHour() {
-  if ((EditModeValue < 0) or (EditModeValue > 23)) {
-     EditModeValue = 0;
-  } 
-  TimeConfig[3] = EditModeValue;
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть годину:");
-  display.setCursor(18, 20);
-  display.setTextSize(2);
-  display.print(TimeConfig[3]);
-}
-
-void SetMinute() {
-  if ((EditModeValue < 0) or (EditModeValue > 59)) {
-     EditModeValue = 0;
-  } 
-  TimeConfig[4] = EditModeValue;
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть хвилину:");
-  display.setCursor(18, 20);
-  display.setTextSize(2);
-  display.print(TimeConfig[4]);
-}
-
-void SetLed() {
-  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
-     EditModeValue = 0;
-  }
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть лiмiт освiтлення:");
-  display.setCursor(18, 25);
-  display.setTextSize(2);
-  EEPROM.write(0, EditModeValue);
-  display.print(EditModeValue);
-}
-
-void SetGas() {
-  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
-     EditModeValue = 0;
-  }
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть лiмiт газу:");
-  display.setCursor(18, 25);
-  display.setTextSize(2);
-  EEPROM.write(1, EditModeValue);
-  display.print(EditModeValue);
-}
-
-void SetFlame() {
-  if ((EditModeValue < 0) or (EditModeValue > 1024)) {
-     EditModeValue = 0;
-  }
-  display.setCursor(0, 0);
-  display.setTextSize(1);
-  display.print("Виберiть лiмiт вогню:");
-  display.setCursor(18, 25);
-  display.setTextSize(2);
-  EEPROM.write(2, EditModeValue);
-  display.print(EditModeValue);
+void DefaultTempleteEditTime (int minLimit, int maxLimit, char text[], int index ) {
+    if ((EditModeValue < minLimit) or (EditModeValue > maxLimit)) {
+       EditModeValue = minLimit;
+    } 
+    TimeConfig[index] = EditModeValue;
+    display.setCursor(0, 0);
+    display.setTextSize(1);
+    display.print(text);
+    display.setCursor(18, 20);
+    display.setTextSize(2);
+    display.print(TimeConfig[index]);
 }
