@@ -249,25 +249,25 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
 
 // views
 void ShowTime () {
-   DateTime rtcnow = rtc.now();
+   DateTime now = rtc.now();
    display.setCursor(18, 0);
    display.setTextSize(1); 
-   char daysOfTheWeek[7][22] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
-   display.print(daysOfTheWeek[rtcnow.dayOfTheWeek()]);
+   char daysOfTheWeek[7][18] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
+   display.print(daysOfTheWeek[now.dayOfTheWeek()]);
    display.setCursor(14, 10);
-   display.println(rtcnow.day(), DEC);
+   display.println(now.day(), DEC);
    display.print("/");
-   display.print(rtcnow.month(), DEC);
+   display.print(now.month(), DEC);
    display.print("/");
-   display.print(rtcnow.year(), DEC);
+   display.print(now.year(), DEC);
    display.setCursor(12, 25);
    display.setTextSize(2);
-   display.print(rtcnow.hour(), DEC);
+   display.print(now.hour(), DEC);
    display.print("-");
-   display.print(rtcnow.minute(), DEC);
+   display.print(now.minute(), DEC);
    display.setTextSize(1);
    display.setCursor(36, 22);
-   display.print(rtcnow.second(), DEC); 
+   display.print(now.second(), DEC); 
 }
 
 void DefaultTempleteShow (char caption1[], long value1, char text1[], char caption2[], long value2, char text2[]) {
