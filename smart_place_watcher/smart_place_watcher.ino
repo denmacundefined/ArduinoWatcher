@@ -116,9 +116,10 @@ void loop() {
     int button1 = analogRead(BUTTONPIN1);
     int button2 = analogRead(BUTTONPIN2);
     boolean editButton = digitalRead(EDITPIN);
+    byte contrast = EEPROM.read(3);
     
   // start functions
-    InitEditMode(editButton, 6);
+    InitEditMode(editButton, 7);
     CheckButtons(100, button1, button2, 5, 0);
     DisplayLedPowerOn(light, EEPROM.read(0));
     PowerOnSignalExpression(gas, EEPROM.read(1), 50, true);
@@ -126,7 +127,8 @@ void loop() {
 
   // start display and set view
     display.clearDisplay();
-    display.setContrast(47);
+    contrast = (contrast < 20) ? 20 : contrast;
+    display.setContrast(contrast);
     display.setTextColor(BLACK);
     if (EditMode) {
       switch (DisplayIndex) {
@@ -154,6 +156,9 @@ void loop() {
         break;
         case 7 :
           DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт вогню:", 2);
+        break;
+        case 8 :
+          DefaultTempleteEditEpprom(20, 100, "Виберiть контраст:", 3);
         break;
       }
     } else {    
@@ -257,12 +262,12 @@ void ShowTime () {
    display.print(rtcnow.year(), DEC);
    display.setCursor(12, 25);
    display.setTextSize(2);
-   /*display.print(rtcnow.hour(), DEC);
+   display.print(rtcnow.hour(), DEC);
    display.print("-");
    display.print(rtcnow.minute(), DEC);
    display.setTextSize(1);
    display.setCursor(36, 22);
-   display.print(rtcnow.second(), DEC); */
+   display.print(rtcnow.second(), DEC); 
 }
 
 void DefaultTempleteShow (char caption1[], long value1, char text1[], char caption2[], long value2, char text2[]) {
