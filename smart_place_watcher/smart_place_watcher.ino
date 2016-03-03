@@ -117,6 +117,14 @@ void loop() {
     int button2 = analogRead(BUTTONPIN2);
     boolean editButton = digitalRead(EDITPIN);
     byte contrast = EEPROM.read(3);
+    DateTime now = rtc.now();
+    int year = now.year();
+    int month = now.month();
+    int day = now.day();
+    int hour = now.hour();
+    int minute = now.minute();
+    int second = now.second();
+    int week = now.dayOfTheWeek();
     
   // start functions
     InitEditMode(editButton, 7);
@@ -127,7 +135,8 @@ void loop() {
 
   // start display and set view
     display.clearDisplay();
-    display.setContrast(contrast); // for first (before edit) run set 50
+    contrast = (contrast < 22) ? 22 : contrast;
+    display.setContrast(contrast);
     display.setTextColor(BLACK);
     if (EditMode) {
       switch (DisplayIndex) {
@@ -157,13 +166,13 @@ void loop() {
           DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт вогню:", 2);
         break;
         case 8 :
-          DefaultTempleteEditEpprom(20, 100, "Виберiть контраст:", 3);
+          DefaultTempleteEditEpprom(22, 100, "Виберiть контраст:", 3);
         break;
       }
     } else {    
       switch (DisplayIndex) {
         case 0 :
-          ShowTime();
+          ShowTime(year, month, day, hour, minute, second, week);
         break;
         case 1:
           DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
@@ -247,26 +256,25 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
 }
 
 // views
-void ShowTime () {
-   DateTime now = rtc.now();
+void ShowTime (int year, int month, int day, int hour, int minute, int second, int week) {   
+   char daysOfTheWeek[7][18] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
    display.setCursor(18, 0);
    display.setTextSize(1); 
-   char daysOfTheWeek[7][18] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
-   display.print(daysOfTheWeek[now.dayOfTheWeek()]);
+   display.print(daysOfTheWeek[week]);
    display.setCursor(14, 10);
-   display.println(now.day(), DEC);
+   display.println(day, DEC);
    display.print("/");
-   display.print(now.month(), DEC);
+   display.print(month, DEC);
    display.print("/");
-   display.print(now.year(), DEC);
+   display.print(year, DEC);
    display.setCursor(12, 25);
    display.setTextSize(2);
-   display.print(now.hour(), DEC);
+   display.print(hour, DEC);
    display.print("-");
-   display.print(now.minute(), DEC);
+   display.print(minute, DEC);
    display.setTextSize(1);
    display.setCursor(36, 22);
-   display.print(now.second(), DEC); 
+   display.print(second, DEC); 
 }
 
 void DefaultTempleteShow (char caption1[], long value1, char text1[], char caption2[], long value2, char text2[]) {
