@@ -70,19 +70,19 @@ void setup() {
   dht.begin();
 
   // init barometr
-  if (!bmp.begin()) {
+  if (! bmp.begin()) {
     DEBUG.println("Could not find BMP085 sensor");
     while (1);
   }
   
   // init time 
-  if (!rtc.begin()) {
+  if (! rtc.begin()) {
     DEBUG.println("Could not find RTC");
     while (1);
   }
   if (! rtc.isrunning()) {
     DEBUG.println("RTC is NOT running!");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
 
   // init wifi
@@ -127,8 +127,7 @@ void loop() {
 
   // start display and set view
     display.clearDisplay();
-    contrast = (contrast < 20) ? 20 : contrast;
-    display.setContrast(contrast);
+    display.setContrast(contrast); // for first (before edit) run set 50
     display.setTextColor(BLACK);
     if (EditMode) {
       switch (DisplayIndex) {
