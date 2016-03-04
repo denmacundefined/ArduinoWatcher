@@ -18,6 +18,10 @@
 #define DEBUGTXPIN 12
 #define DEBUGRXPIN 11
 #define EDITPIN 8
+#define MINLIMITFORWORK 22
+#define SIGNALTIME 50
+#define SHOWDISPLAYCOUNT 5
+#define SHOWEDITCOUNT 10
 
 // include section
 #include <EEPROM.h>
@@ -31,12 +35,12 @@
 #include <SoftwareSerial.h>
 
 // global variable section
-RTC_DS1307 rtc;
+//RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
 SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
-int DisplayIndex = 0;
+byte DisplayIndex = 0;
 int EditModeValue = 0;
 boolean EditMode = false;
 int TimeConfig[5];
@@ -76,14 +80,14 @@ void setup() {
   }
   
   // init time 
-  if (! rtc.begin()) {
+  /*if (! rtc.begin()) {
     DEBUG.println("Could not find RTC");
     while (1);
   }
   if (! rtc.isrunning()) {
     DEBUG.println("RTC is NOT running!");
     //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  }
+  } */
 
   // init wifi
   /*Serial.begin(115200);
@@ -104,8 +108,8 @@ void setup() {
 void loop() { 
 
   // get data from sensors
-    float humidity = dht.readHumidity();
-    float temp = dht.readTemperature();
+    float humidity = dht.readHumidity() - EEPROM.read(6);
+    float temp = dht.readTemperature() - EEPROM.read(5);
     float tempFromBarometr = bmp.readTemperature();
     long pressure = bmp.readPressure();
     int altitude = bmp.readAltitude();
@@ -113,89 +117,94 @@ void loop() {
     int gas = analogRead(GASPIN);
     int flame = analogRead(FLAMEPIN);
     int vibro = analogRead(VIBROPIN);
-    int button1 = analogRead(BUTTONPIN1);
-    int button2 = analogRead(BUTTONPIN2);
     boolean editButton = digitalRead(EDITPIN);
     byte contrast = EEPROM.read(3);
-    DateTime now = rtc.now();
+    /*DateTime now = rtc.now();
     int year = now.year();
-    int month = now.month();
-    int day = now.day();
-    int hour = now.hour();
-    int minute = now.minute();
-    int second = now.second();
-    int week = now.dayOfTheWeek();
+    byte month = now.month();
+    byte day = now.day();
+    byte hour = now.hour();
+    byte minute = now.minute();
+    byte second = now.second();
+    byte week = now.dayOfTheWeek();*/
     
   // start functions
-    InitEditMode(editButton, 7);
-    CheckButtons(100, button1, button2, 5, 0);
+    InitEditMode(editButton, SHOWEDITCOUNT);
+    if (! EditMode) {
+      CheckButtons(EEPROM.read(4), analogRead(BUTTONPIN1), analogRead(BUTTONPIN2), SHOWDISPLAYCOUNT, 0);
+    }
     DisplayLedPowerOn(light, EEPROM.read(0));
-    PowerOnSignalExpression(gas, EEPROM.read(1), 50, true);
-    PowerOnSignalExpression(flame, EEPROM.read(2), 50, false);
+    PowerOnSignalExpression(gas, EEPROM.read(1), SIGNALTIME, true);
+    PowerOnSignalExpression(flame, EEPROM.read(2), SIGNALTIME, false);
 
   // start display and set view
     display.clearDisplay();
-    contrast = (contrast < 22) ? 22 : contrast;
+    contrast = (contrast < MINLIMITFORWORK) ? MINLIMITFORWORK : contrast;
     display.setContrast(contrast);
     display.setTextColor(BLACK);
     if (EditMode) {
-      switch (DisplayIndex) {
-        case 0 :
+      if (DisplayIndex == 0) {
           DefaultTempleteEditTime(2000, 3000, "Виберiть рiк:", 0);
-        break;
-        case 1 :
+      }
+      if (DisplayIndex == 1) {
           DefaultTempleteEditTime(1, 12, "Виберiть мiсяць:", 1);
-        break;
-        case 2 :
+      }
+      if (DisplayIndex == 2) {
           DefaultTempleteEditTime(1, 31, "Виберiть день:", 2);
-        break;
-        case 3 :
+      }
+      if (DisplayIndex == 3) {
           DefaultTempleteEditTime(0, 23, "Виберiть годину:", 3);
-        break;
-        case 4 :
+      }
+      if (DisplayIndex == 4) {
           DefaultTempleteEditTime(0, 59, "Виберiть хвилину:", 4);
-        break;
-        case 5 :
-          rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
-          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт освiтлення:", 0);
-        break;
-        case 6 :
-          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт газу:", 1);
-        break;
-        case 7 :
-          DefaultTempleteEditEpprom(0, 1024, "Виберiть лiмiт вогню:", 2);
-        break;
-        case 8 :
-          DefaultTempleteEditEpprom(22, 100, "Виберiть контраст:", 3);
-        break;
+      }
+      if (DisplayIndex == 5) {
+          //rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
+          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт освiтлення:", 0);
+      }
+      if (DisplayIndex == 6) {
+          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт газу:", 1);
+      }
+      if (DisplayIndex == 7) {
+          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт вогню:", 2);
+      }
+      if (DisplayIndex == 8) {
+          DefaultTempleteEditEpprom(MINLIMITFORWORK, 100, "Виберiть контраст:", 3);
+      }
+      if (DisplayIndex == 9) {
+          DefaultTempleteEditEpprom(MINLIMITFORWORK, 255, "Виберiть вiдстань реагування кнопок:", 4);
+      }
+      if (DisplayIndex == 10) {
+          DefaultTempleteEditEpprom(0, 255, "Виберiть декремент температури:", 5);
+      }
+      if (DisplayIndex == 11) {
+          DefaultTempleteEditEpprom(0, 255, "Виберiть  декремент вологостi:", 6);
       }
     } else {    
-      switch (DisplayIndex) {
-        case 0 :
-          ShowTime(year, month, day, hour, minute, second, week);
-        break;
-        case 1:
+      if (DisplayIndex == 0) {
+          //ShowTime(year, month, day, hour, minute, second, week);
+      }
+      if (DisplayIndex == 1) {
           DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
-        break;
-        case 2:
+      }
+      if (DisplayIndex == 2) {
           DefaultTempleteShow("Тиск:", pressure, " паск.", "Висота: ", altitude, " метрiв");
-        break;
-        case 3:
+      }
+      if (DisplayIndex == 3) {
           DefaultTempleteShow("Освiтлення:", light, " число", "Температура з барометра: ", tempFromBarometr, " градусiв");
-        break;
-        case 4:
+      }
+      if (DisplayIndex == 4) {
           DefaultTempleteShow("Гази:", gas, " число", "Вогонь: ", flame, "  число");
-        break;
-        case 5:
+      }
+      if (DisplayIndex == 5) {
           DefaultTempleteShow("Вiбрацiя:", vibro, "  число", "", 0, "");
-        break;
       }
     }
     display.display();
 }
 
 // function section
-void InitEditMode (boolean value, int Limit) {
+void InitEditMode (boolean value, byte Limit) {
   if (!value) {
     if (EditMode) {
       if (DisplayIndex > Limit) {
@@ -211,7 +220,8 @@ void InitEditMode (boolean value, int Limit) {
   }
 }
 
-void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit, int TimeDelay) {
+void CheckButtons (byte DefaultLimit, int Decrement, int Increment, byte MaxLimit, byte TimeDelay) {
+  DefaultLimit = (DefaultLimit < MINLIMITFORWORK) ? MINLIMITFORWORK : DefaultLimit;
   if (EditMode) {
     if ((Decrement > DefaultLimit)) {
       EditModeValue--;
@@ -233,7 +243,7 @@ void CheckButtons (int DefaultLimit, int Decrement, int Increment, int MaxLimit,
   }
 }
 
-void PowerOnSignalExpression (int value, int checkValue, int interval, boolean more) {
+void PowerOnSignalExpression (int value, int checkValue, byte interval, boolean more) {
   boolean validation;
   if (more) {
       validation = (value > checkValue) ? true : false;
@@ -247,7 +257,7 @@ void PowerOnSignalExpression (int value, int checkValue, int interval, boolean m
   }
 }
 
-void DisplayLedPowerOn (int light, int DefaultLimit) {
+void DisplayLedPowerOn (int light, byte DefaultLimit) {
   if (light < DefaultLimit) {
     digitalWrite(DISPLAYLEDPIN, HIGH);
   } else {
@@ -256,7 +266,7 @@ void DisplayLedPowerOn (int light, int DefaultLimit) {
 }
 
 // views
-void ShowTime (int year, int month, int day, int hour, int minute, int second, int week) {   
+void ShowTime (int year, byte month, byte day, byte hour, byte minute, byte second, byte week) {   
    char daysOfTheWeek[7][18] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
    display.setCursor(18, 0);
    display.setTextSize(1); 
@@ -294,20 +304,23 @@ void DefaultTempleteShow (char caption1[], long value1, char text1[], char capti
 }
 
 //edit mode
-void DefaultTempleteEditEpprom (int minLimit, int maxLimit, char text[], int epprom ) {
+void DefaultTempleteEditEpprom (byte minLimit, byte maxLimit, char text[], int epprom ) {
+    EditModeValue = EEPROM.read(epprom);
+    CheckButtons(EEPROM.read(4), analogRead(BUTTONPIN1), analogRead(BUTTONPIN2), SHOWDISPLAYCOUNT, 0);
     if ((EditModeValue < minLimit) or (EditModeValue > maxLimit)) {
        EditModeValue = minLimit;
     } 
-    EEPROM.write(epprom, EditModeValue);
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.print(text);
-    display.setCursor(18, 20);
+    display.setCursor(22, 30);
     display.setTextSize(2);
     display.print(EditModeValue);
+    EEPROM.write(epprom, EditModeValue);
 }
 
-void DefaultTempleteEditTime (int minLimit, int maxLimit, char text[], int index ) {
+void DefaultTempleteEditTime (int minLimit, int maxLimit, char text[], byte index ) {
+    CheckButtons(EEPROM.read(4), analogRead(BUTTONPIN1), analogRead(BUTTONPIN2), SHOWDISPLAYCOUNT, 0);
     if ((EditModeValue < minLimit) or (EditModeValue > maxLimit)) {
        EditModeValue = minLimit;
     } 
@@ -315,7 +328,7 @@ void DefaultTempleteEditTime (int minLimit, int maxLimit, char text[], int index
     display.setCursor(0, 0);
     display.setTextSize(1);
     display.print(text);
-    display.setCursor(18, 20);
+    display.setCursor(20, 25);
     display.setTextSize(2);
     display.print(TimeConfig[index]);
 }
