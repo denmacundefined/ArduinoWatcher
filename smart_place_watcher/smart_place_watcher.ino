@@ -35,7 +35,7 @@
 #include <SoftwareSerial.h>
 
 // global variable section
-//RTC_DS1307 rtc;
+RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
@@ -50,7 +50,6 @@ void setup() {
   
   //debug
   DEBUG.begin(9600);
-  //Serial.begin(9600);
   
   // set pin type 
   pinMode(BUTTONPIN1, INPUT);
@@ -80,17 +79,17 @@ void setup() {
   }
   
   // init time 
-  /*if (! rtc.begin()) {
+  if (! rtc.begin()) {
     DEBUG.println("Could not find RTC");
     while (1);
   }
   if (! rtc.isrunning()) {
     DEBUG.println("RTC is NOT running!");
-    //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  } */
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  } 
 
   // init wifi
-  /*Serial.begin(115200);
+  Serial.begin(115200);
   Serial.setTimeout(5000);
   Serial.println("AT+RST");
   delay(1000);
@@ -119,14 +118,13 @@ void loop() {
     int vibro = analogRead(VIBROPIN);
     boolean editButton = digitalRead(EDITPIN);
     byte contrast = EEPROM.read(3);
-    /*DateTime now = rtc.now();
+    DateTime now = rtc.now();
     int year = now.year();
     byte month = now.month();
     byte day = now.day();
     byte hour = now.hour();
     byte minute = now.minute();
     byte second = now.second();
-    byte week = now.dayOfTheWeek();*/
     
   // start functions
     InitEditMode(editButton, SHOWEDITCOUNT);
@@ -159,7 +157,7 @@ void loop() {
           DefaultTempleteEditTime(0, 59, "Виберiть хвилину:", 4);
       }
       if (DisplayIndex == 5) {
-          //rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
+          rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
           DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт освiтлення:", 0);
       }
       if (DisplayIndex == 6) {
@@ -182,7 +180,7 @@ void loop() {
       }
     } else {    
       if (DisplayIndex == 0) {
-          //ShowTime(year, month, day, hour, minute, second, week);
+          ShowTime(year, month, day, hour, minute, second);
       }
       if (DisplayIndex == 1) {
           DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
@@ -266,12 +264,9 @@ void DisplayLedPowerOn (int light, byte DefaultLimit) {
 }
 
 // views
-void ShowTime (int year, byte month, byte day, byte hour, byte minute, byte second, byte week) {   
-   char daysOfTheWeek[7][18] = {"Недiля", "Понедiлок", "Вiвторок", "Середа", "Четвер", "П\'ятниця", "Субота"};
-   display.setCursor(18, 0);
-   display.setTextSize(1); 
-   display.print(daysOfTheWeek[week]);
-   display.setCursor(14, 10);
+void ShowTime (int year, byte month, byte day, byte hour, byte minute, byte second) {   
+   display.setTextSize(1);
+   display.setCursor(14, 5);
    display.println(day, DEC);
    display.print("/");
    display.print(month, DEC);
@@ -279,12 +274,18 @@ void ShowTime (int year, byte month, byte day, byte hour, byte minute, byte seco
    display.print(year, DEC);
    display.setCursor(12, 25);
    display.setTextSize(2);
+   if (hour < 10) {
+     display.print("0");
+   }
    display.print(hour, DEC);
    display.print("-");
+   if (minute < 10) {
+     display.print("0");
+   }
    display.print(minute, DEC);
    display.setTextSize(1);
-   display.setCursor(36, 22);
-   display.print(second, DEC); 
+   display.setCursor(35, 22);
+   display.print(second, DEC);
 }
 
 void DefaultTempleteShow (char caption1[], long value1, char text1[], char caption2[], long value2, char text2[]) {
