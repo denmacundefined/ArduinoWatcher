@@ -87,20 +87,6 @@ void setup() {
     DEBUG.println("RTC is NOT running!");
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   } 
-
-  // init wifi
-  Serial.begin(115200);
-  Serial.setTimeout(5000);
-  Serial.println("AT+RST");
-  delay(1000);
-  DEBUG.println(Serial.readString());
-  /*if (Serial.find("ready")) {
-    DEBUG.print("WiFi - Module is ready");
-  }else{
-    DEBUG.print("Module dosn't respond.");
-    while(1);
-  }*/
-  
 }
 
 // main section
