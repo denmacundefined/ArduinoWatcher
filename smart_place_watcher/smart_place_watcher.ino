@@ -85,7 +85,7 @@ void setup() {
   }
   if (! rtc.isrunning()) {
     DEBUG.println("RTC is NOT running!");
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   } 
 }
 
