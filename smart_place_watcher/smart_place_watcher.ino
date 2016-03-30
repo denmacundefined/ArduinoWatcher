@@ -16,8 +16,8 @@
 #define LIGHTPIN A6
 #define BUZZERPIN 10
 #define STXPIN 12
-#define SRXPIN 11
-#define EDITPIN 8
+//#define SRXPIN 11
+//#define EDITPIN 8
 #define MINLIMITFORWORK 22
 #define SIGNALTIME 50
 #define SHOWDISPLAYCOUNT 5
@@ -32,14 +32,12 @@
 #include <Adafruit_BMP085.h>
 #include <Wire.h>
 #include <RTClib.h>
-#include <SoftwareSerial.h>
 
 // global variable section
 RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
-SoftwareSerial SSerial(SRXPIN, STXPIN);
 byte DisplayIndex = 0;
 int EditModeValue = 0;
 boolean EditMode = false;
@@ -50,7 +48,6 @@ void setup() {
   
   //serial and softserial
   Serial.begin(9600);
-  SSerial.begin(115200);
   
   // set pin type 
   pinMode(BUTTONPIN1, INPUT);
