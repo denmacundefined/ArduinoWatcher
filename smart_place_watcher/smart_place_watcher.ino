@@ -15,8 +15,8 @@
 #define FLAMEPIN A0
 #define LIGHTPIN A6
 #define BUZZERPIN 10
-#define DEBUGTXPIN 12
-#define DEBUGRXPIN 11
+#define STXPIN 12
+#define SRXPIN 11
 #define EDITPIN 8
 #define MINLIMITFORWORK 22
 #define SIGNALTIME 50
@@ -39,7 +39,7 @@ RTC_DS1307 rtc;
 Adafruit_PCD8544 display = Adafruit_PCD8544(DISPLAYSCLKPIN, DISPLAYDNPIN, DISPLAYDCPIN, DISPLAYSCEPIN, DISPLAYRSTPIN);
 DHT dht(DHTPIN, DHTTYPE);
 Adafruit_BMP085 bmp;
-SoftwareSerial DEBUG(DEBUGRXPIN, DEBUGTXPIN);
+SoftwareSerial SSerial(SRXPIN, STXPIN);
 byte DisplayIndex = 0;
 int EditModeValue = 0;
 boolean EditMode = false;
@@ -48,8 +48,9 @@ int TimeConfig[5];
 // config section
 void setup() {
   
-  //debug
-  DEBUG.begin(9600);
+  //serial and softserial
+  Serial.begin(9600);
+  SSerial.begin(115200);
   
   // set pin type 
   pinMode(BUTTONPIN1, INPUT);
@@ -74,18 +75,18 @@ void setup() {
 
   // init barometr
   if (! bmp.begin()) {
-    DEBUG.println("Could not find BMP085 sensor");
+    Serial.println("Could not find BMP085 sensor");
     while (1);
   }
   
   // init time 
   if (! rtc.begin()) {
-    DEBUG.println("Could not find RTC");
+    Serial.println("Could not find RTC");
     while (1);
   }
   if (! rtc.isrunning()) {
-    DEBUG.println("RTC is NOT running!");
-    //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    Serial.println("RTC is NOT running!");
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   } 
 }
 
@@ -114,7 +115,7 @@ void loop() {
     
   // start functions
     InitEditMode(editButton, SHOWEDITCOUNT);
-    if (! EditMode) {
+    if (!EditMode) {
       CheckButtons(EEPROM.read(4), analogRead(BUTTONPIN1), analogRead(BUTTONPIN2), SHOWDISPLAYCOUNT, 0);
     }
     DisplayLedPowerOn(light, EEPROM.read(0));
@@ -127,62 +128,66 @@ void loop() {
     display.setContrast(contrast);
     display.setTextColor(BLACK);
     if (EditMode) {
-      if (DisplayIndex == 0) {
-          DefaultTempleteEditTime(2000, 3000, "Виберiть рiк:", 0);
+      switch (DisplayIndex) {
+        case 0:
+            DefaultTempleteEditTime(2000, 3000, "Виберiть рiк:", 0);
+          break;
+        case 1:
+            DefaultTempleteEditTime(1, 12, "Виберiть мiсяць:", 1);
+          break;
+        case 2:
+            DefaultTempleteEditTime(1, 31, "Виберiть день:", 2);
+          break;
+        case 3:
+            DefaultTempleteEditTime(0, 23, "Виберiть годину:", 3);
+          break;
+        case 4:
+            DefaultTempleteEditTime(0, 59, "Виберiть хвилину:", 4);
+          break;
+        case 5:
+            rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
+            DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт освiтлення:", 0);
+          break;
+        case 6:
+            DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт газу:", 1);
+          break;
+        case 7:
+            DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт вогню:", 2);
+          break;
+        case 8:
+            DefaultTempleteEditEpprom(MINLIMITFORWORK, 100, "Виберiть контраст:", 3);
+          break;
+        case 9:
+            DefaultTempleteEditEpprom(MINLIMITFORWORK, 255, "Виберiть вiдстань реагування кнопок:", 4);
+          break;
+        case 10:
+            DefaultTempleteEditEpprom(0, 255, "Виберiть декремент температури:", 5);
+          break;
+        case 11:
+            DefaultTempleteEditEpprom(0, 255, "Виберiть  декремент вологостi:", 6);
+          break;
       }
-      if (DisplayIndex == 1) {
-          DefaultTempleteEditTime(1, 12, "Виберiть мiсяць:", 1);
-      }
-      if (DisplayIndex == 2) {
-          DefaultTempleteEditTime(1, 31, "Виберiть день:", 2);
-      }
-      if (DisplayIndex == 3) {
-          DefaultTempleteEditTime(0, 23, "Виберiть годину:", 3);
-      }
-      if (DisplayIndex == 4) {
-          DefaultTempleteEditTime(0, 59, "Виберiть хвилину:", 4);
-      }
-      if (DisplayIndex == 5) {
-          rtc.adjust(DateTime(TimeConfig[0], TimeConfig[1], TimeConfig[2], TimeConfig[3], TimeConfig[4], 0)); //year, month, day, hour, minute
-          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт освiтлення:", 0);
-      }
-      if (DisplayIndex == 6) {
-          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт газу:", 1);
-      }
-      if (DisplayIndex == 7) {
-          DefaultTempleteEditEpprom(0, 255, "Виберiть лiмiт вогню:", 2);
-      }
-      if (DisplayIndex == 8) {
-          DefaultTempleteEditEpprom(MINLIMITFORWORK, 100, "Виберiть контраст:", 3);
-      }
-      if (DisplayIndex == 9) {
-          DefaultTempleteEditEpprom(MINLIMITFORWORK, 255, "Виберiть вiдстань реагування кнопок:", 4);
-      }
-      if (DisplayIndex == 10) {
-          DefaultTempleteEditEpprom(0, 255, "Виберiть декремент температури:", 5);
-      }
-      if (DisplayIndex == 11) {
-          DefaultTempleteEditEpprom(0, 255, "Виберiть  декремент вологостi:", 6);
-      }
-    } else {    
-      if (DisplayIndex == 0) {
-          ShowTime(year, month, day, hour, minute, second);
-      }
-      if (DisplayIndex == 1) {
-          DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
-      }
-      if (DisplayIndex == 2) {
-          DefaultTempleteShow("Тиск:", pressure, " паск.", "Висота: ", altitude, " метрiв");
-      }
-      if (DisplayIndex == 3) {
-          DefaultTempleteShow("Освiтлення:", light, " число", "Температура з барометра: ", tempFromBarometr, " градусiв");
-      }
-      if (DisplayIndex == 4) {
-          DefaultTempleteShow("Гази:", gas, " число", "Вогонь: ", flame, "  число");
-      }
-      if (DisplayIndex == 5) {
-          DefaultTempleteShow("Вiбрацiя:", vibro, "  число", "", 0, "");
-      }
+    } else { 
+      switch (DisplayIndex) {
+        case 0:
+            ShowTime(year, month, day, hour, minute, second);
+          break;
+        case 1:
+            DefaultTempleteShow("Температура:", temp, " градусiв", "Вологiсть: ", humidity, " процентiв");
+          break;
+        case 2:
+            DefaultTempleteShow("Тиск:", pressure, " паск.", "Висота: ", altitude, " метрiв");
+          break;
+        case 3:
+            DefaultTempleteShow("Освiтлення:", light, " число", "Температура з барометра: ", tempFromBarometr, " градусiв");
+          break;
+        case 4:
+            DefaultTempleteShow("Гази:", gas, " число", "Вогонь: ", flame, "  число");
+          break;
+        case 5:
+            DefaultTempleteShow("Вiбрацiя:", vibro, "  число", "", 0, "");
+          break;
+      }   
     }
     display.display();
 }
