@@ -15,13 +15,15 @@
 #define FLAMEPIN A0
 #define LIGHTPIN A6
 #define BUZZERPIN 10
-#define STXPIN 12
-//#define SRXPIN 11
-//#define EDITPIN 8
+#define LEDGREENPIN 12
+#define LEDBLUEPIN 11
+#define EDITPIN 8
 #define MINLIMITFORWORK 22
 #define SIGNALTIME 50
 #define SHOWDISPLAYCOUNT 5
-#define SHOWEDITCOUNT 10
+#define SHOWEDITCOUNT 12
+#define MINHUM 30
+#define MAXHUM 60
 
 // include section
 #include <EEPROM.h>
@@ -60,6 +62,8 @@ void setup() {
   pinMode(EDITPIN, INPUT);
   pinMode(BUZZERPIN, OUTPUT);
   pinMode(VIBROGROUNDPIN, OUTPUT);
+  pinMode(LEDGREENPIN, OUTPUT);
+  pinMode(LEDBLUEPIN, OUTPUT);
   
   // init vibrosensor
   digitalWrite(VIBROGROUNDPIN, LOW);
@@ -118,6 +122,7 @@ void loop() {
     DisplayLedPowerOn(light, EEPROM.read(0));
     PowerOnSignalExpression(gas, EEPROM.read(1), SIGNALTIME, true);
     PowerOnSignalExpression(flame, EEPROM.read(2), SIGNALTIME, false);
+    TestTempAndHum(temp, humidity, SIGNALTIME, EEPROM.read(7), EEPROM.read(8));
 
   // start display and set view
     display.clearDisplay();
@@ -161,7 +166,13 @@ void loop() {
             DefaultTempleteEditEpprom(0, 255, "Виберiть декремент температури:", 5);
           break;
         case 11:
-            DefaultTempleteEditEpprom(0, 255, "Виберiть  декремент вологостi:", 6);
+            DefaultTempleteEditEpprom(0, 255, "Виберiть декремент вологостi:", 6);
+          break;
+        case 12:
+            DefaultTempleteEditEpprom(0, 100, "Виберiть мiнiмальну температуру:", 7);
+          break;
+        case 13:
+            DefaultTempleteEditEpprom(0, 100, "Виберiть максимальну температуру:", 8);
           break;
       }
     } else { 
@@ -229,6 +240,17 @@ void CheckButtons (byte DefaultLimit, int Decrement, int Increment, byte MaxLimi
   }
 }
 
+void TestTempAndHum (float temp, float humidity, byte interval, byte minValue, byte maxValue) {
+  boolean validation = false;
+  validation = ((humidity < MINHUM) or (humidity > MAXHUM)) ? true : validation;
+  validation = (( temp > maxValue) or ( temp < minValue)) ? true : validation;
+  if (validation) {
+    analogWrite (LEDBLUEPIN, 255);
+    delay (interval);
+    analogWrite (LEDBLUEPIN, 0);
+  }
+}
+
 void PowerOnSignalExpression (int value, int checkValue, byte interval, boolean more) {
   boolean validation;
   if (more) {
@@ -238,8 +260,10 @@ void PowerOnSignalExpression (int value, int checkValue, byte interval, boolean 
   }
   if (validation) {
     analogWrite (BUZZERPIN, 255);
+    analogWrite (LEDGREENPIN, 255);
     delay (interval);
     analogWrite (BUZZERPIN, 0);
+    analogWrite (LEDGREENPIN, 0);
   }
 }
 
