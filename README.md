@@ -3,5 +3,4 @@ DIY device based on arduino nano, which can show actual time and also can monito
 
 ## Device schema in fritzing
 ![smart-watcher](/maket.png)
-
-[download in .fzz](/maket.fzz)
+Every element had self identification and you can very easy find where you can get this specific element [schema in .fzz](/maket.fzz)
