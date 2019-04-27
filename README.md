@@ -16,7 +16,8 @@ For upload firmware to arduino nano you need get Arduino IDE, configure connecti
 Basic menu on ukrainian language. If you don't know this amayzing language you can set your custom labels.
 
 ## Device in work
+### Video (in working)
 [@denmacundefined -> smart-watcher](https://www.instagram.com/p/BB51P2mobBkVvh-rVULdKUSqMBvu1-GBIct9Zo0/?igshid=jvuxkgrlvncv)
 
-How it looks:
+### Photo (creating and final time)
 ![smart-watcher](/smart-watcher.png)
