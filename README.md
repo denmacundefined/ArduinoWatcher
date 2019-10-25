@@ -15,12 +15,11 @@ For upload firmware to arduino nano you need get Arduino IDE, configure connecti
 ### Language
 Basic menu on ukrainian language. If you don't know this amayzing language you can set your custom labels.
 
-## Device in work
-### Video 
-#### With relay
+### Device in work
+#### With relay (Video)
 [![smart-watcher](http://img.youtube.com/vi/v8BTbCq8ZkM/0.jpg)](http://www.youtube.com/watch?v=v8BTbCq8ZkM)
 
-#### With RGB light notification
+#### With RGB light notification (Video)
 [![smart-watcher](http://img.youtube.com/vi/iDc_tBFiMWg/0.jpg)](http://www.youtube.com/watch?v=iDc_tBFiMWg)
 
 ### Photo (creating time and final version)
