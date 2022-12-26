@@ -1,4 +1,4 @@
-# Smart watcher
+# Smart Watcher
 DIY device for getting possibility to get alerts on gas in room or check some air condition in room.
 
 ## Hardware
