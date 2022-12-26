@@ -1,5 +1,5 @@
 # Smart watcher
-DIY device for getting posibility to get alerts on gas in room or check some air condition in room.
+DIY device for getting possibility to get alerts on gas in room or check some air condition in room.
 
 ## Hardware
 Here is schema for creating device based on fritzing:
